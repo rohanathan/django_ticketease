@@ -51,7 +51,8 @@ If Poetry is installed, **proceed to the next step.**
 Go to a folder where you want to keep the project and **clone the repository**:
 
 
-`git clone https://github.com/YourRepo/ticketease.git cd ticketease`
+`git clone https://2980262S@dev.azure.com/2980262S/ticketease/_git/ticketease`
+`cd ticketease`
 
 ✅ **Ensure that you are inside the `ticketease` project folder before proceeding.**
 

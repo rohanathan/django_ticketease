@@ -14,6 +14,7 @@ import environ
 import os
 from pathlib import Path
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,7 +27,7 @@ environ.Env.read_env(BASE_DIR / ".env")
 # Security
 SECRET_KEY = env("SECRET_KEY", default="your-default-secret-key")
 DEBUG = env.bool("DEBUG", default=True)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 # Application definition
 INSTALLED_APPS = [
@@ -61,7 +62,9 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / "templates",  # Points to the templates/ folder
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -80,11 +83,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env("POSTGRES_DB", default="ticketease"),
-        'USER': env("POSTGRES_USER", default="ticketease_admin"),
-        'PASSWORD': env("POSTGRES_PASSWORD", default="compsci5012"),
-        'HOST': env("POSTGRES_HOST", default="db"),
-        'PORT': env.int("POSTGRES_PORT", default=5432),
+        'NAME': env("POSTGRES_DB"),
+        'USER': env("POSTGRES_USER"),
+        'PASSWORD': env("POSTGRES_PASSWORD"),
+        'HOST': env("POSTGRES_HOST"),
+        'PORT': env.int("POSTGRES_PORT"),
     }
 }
 
@@ -103,10 +106,23 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Define STATIC_ROOT so collectstatic knows where to put files
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+#STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# All the custom CSS/JS/images located @BASE_DIR / "static"
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+
+# Media files (User uploads)
+MEDIA_URL = "/media/"
+#MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = BASE_DIR / "media"
+
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -116,9 +132,10 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("EMAIL_HOST", default="smtp.sendgrid.net")
 EMAIL_PORT = env.int("EMAIL_PORT", default=587)
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
+MAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)  # Add SSL option for production
 EMAIL_HOST_USER = env("EMAIL_HOST_USER", default="apikey")
-EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="your-sendgrid-api-key")
+EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@ticketease.com")
 
 # Stripe API Key
-STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY", default="your-stripe-key")
+STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")

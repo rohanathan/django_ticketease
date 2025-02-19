@@ -1,0 +1,39 @@
+<!-- templates/home.html -->
+{% extends 'base.html' %}
+{% load static %}  <!-- Ensure static files are loaded -->
+
+{% block title %}Home - TicketEase{% endblock %}
+
+{% block content %}
+<div class="row">
+  <!-- Banner / Hero Section -->
+  <div class="col-12 mb-4">
+    <div class="p-5 text-white bg-dark rounded-3">
+      <h1>Welcome to TicketEase!</h1>
+      <p>Discover and book tickets for movies, shows, and events around you.</p>
+      <a href="{% url 'movies_list' %}" class="btn btn-primary btn-lg">Check Movies</a>
+      <a href="{% url 'events_list' %}" class="btn btn-secondary btn-lg">Check Events</a>
+    </div>
+  </div>
+</div>
+
+<!-- Dynamically Show Featured Movies -->
+<div class="row">
+  <h2 class="fw-bold mb-3">Featured Movies</h2>
+
+  {% for movie in featured_movies %}
+  <div class="col-md-3 mb-3">
+    <div class="card">
+      <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}">
+      <div class="card-body">
+        <h5 class="card-title">{{ movie.title }}</h5>
+        <p class="card-text">{{ movie.description|truncatewords:15 }}</p>
+        <a href="{% url 'movies_detail' movie.id %}" class="btn btn-primary">Book Now</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p>No featured movies available.</p>
+  {% endfor %}
+</div>
+{% endblock %}

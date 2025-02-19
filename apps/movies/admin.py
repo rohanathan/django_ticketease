@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Movie, Showtime
+from .models import Movie
 
 # Register your models here.
 #admin.site.register(Movie)
@@ -10,4 +10,3 @@ class MovieAdmin(admin.ModelAdmin):
     list_filter = ('genre', 'rating', 'release_date')
 
 
-admin.site.register(Showtime)

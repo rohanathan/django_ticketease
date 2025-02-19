@@ -88,3 +88,22 @@ Before running Django commands, **activate the virtual environment**:
 `(ticketease-py3.12) user@hostname:~/ticketease$`
 
 This means you are inside the virtual environment. **Now, all commands must be run inside this shell.**
+
+
+## Install Docker Desktop
+brew install --cask docker
+
+After installation, open Docker Desktop and enable it to start at login.
+
+## Install Poetry
+
+brew install poetry
+
+## Starting the Containers
+Run the following command to build and start the containers:
+
+docker-compose up --build
+
+Verify Services are Running
+
+docker ps

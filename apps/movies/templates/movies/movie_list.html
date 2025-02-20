@@ -1,4 +1,4 @@
-<!-- templates/movies_list.html -->
+<!-- templates/movie_list.html -->
 {% extends 'base.html' %}
 
 {% block title %}Movies - TicketEase{% endblock %}
@@ -9,11 +9,16 @@
   {% for movie in movies %}
   <div class="col-md-3 mb-3">
     <div class="card">
-      <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}">
+      <a href="{% url 'movie_detail' movie.id %}">
+        <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}">
+      </a>
       <div class="card-body">
-        <h5 class="card-title">{{ movie.title }}</h5>
+        <h5 class="card-title">
+          <a href="{% url 'movie_detail' movie.id %}" class="text-dark text-decoration-none">
+            {{ movie.title }}
+          </a>
+        </h5>
         <p class="card-text">{{ movie.description|truncatewords:20 }}</p>
-        <a href="{% url 'movies_detail' movie.id %}" class="btn btn-primary">Book Now</a>
       </div>
     </div>
   </div>

@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4 text-center">
+    <h2>Booking Confirmed 🎉</h2>
+    
+    <p><strong>Movie:</strong> {{ movie.title }}</p>
+    <p><strong>Showtime:</strong> {{ showtime.datetime }}</p>
+    <p><strong>Seats:</strong> {{ selected_seats|join:", " }}</p>
+
+    <h4>Scan your QR Code</h4>
+    <img src="data:image/png;base64,{{ qr_code_data }}" alt="Booking QR Code">
+
+    <p>Show this QR code at the cinema for entry.</p>
+</div>
+{% endblock %}

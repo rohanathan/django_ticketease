@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center">Confirm Your Booking</h2>
+    
+    <p><strong>Movie:</strong> {{ movie.title }}</p>
+    <p><strong>Showtime:</strong> {{ showtime.datetime }}</p>
+    <p><strong>Selected Seats:</strong></p>
+    <ul>
+        {% for seat in selected_seats %}
+            <li>{{ seat }}</li>
+        {% endfor %}
+    </ul>
+    
+    <h4>Total Price: ₹{{ total_price }}</h4>
+
+    <form action="{% url 'booking_success' movie.id showtime.id %}" method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="selected_seats" value="{{ selected_seats|join:',' }}">
+        <button type="submit" class="btn btn-success">Confirm Booking</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+/* Screen Header */
+.screen-box {
+    width: 80%;
+    margin: auto;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 5px;
+}
+
+/* Seat Grid */
+.seat-grid {
+    display: flex;  /* Use flexbox to align seats properly */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+}
+
+/* Individual Seat Styling */
+.seat-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #444;
+    background-color: #ccc;
+    cursor: pointer;
+    border-radius: 5px;
+    text-align: center;
+    display: inline-block; /* Ensure visibility */
+    margin: 5px; /* Space between seats */
+}
+
+.seat-btn.selected {
+    background-color: green;
+    color: white;
+}
+
+.seat-btn.unavailable {
+    background-color: gray;
+    cursor: not-allowed;
+}

@@ -21,13 +21,12 @@ from config.views import home
 from django.conf.urls.static import static
 from django.conf import settings
 
-
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', home, name='home'),  # Define the homepage
     path('movies/', include('apps.movies.urls')),  # Movie-related URLs
     path('events/', include('apps.events.urls')),  # "Events" has a placeholder
+    path("bookings/", include("apps.bookings.urls")),  # Booking URLs added here
     path('accounts/', include('django.contrib.auth.urls')),  # Adds Django Built-in login/logout/register views
 ]
 

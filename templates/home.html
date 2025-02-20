@@ -11,7 +11,7 @@
     <div class="p-5 text-white bg-dark rounded-3">
       <h1>Welcome to TicketEase!</h1>
       <p>Discover and book tickets for movies, shows, and events around you.</p>
-      <a href="{% url 'movies_list' %}" class="btn btn-primary btn-lg">Check Movies</a>
+      <a href="{% url 'movie_list' %}" class="btn btn-primary btn-lg">Check Movies</a>
       <a href="{% url 'events_list' %}" class="btn btn-secondary btn-lg">Check Events</a>
     </div>
   </div>
@@ -28,7 +28,7 @@
       <div class="card-body">
         <h5 class="card-title">{{ movie.title }}</h5>
         <p class="card-text">{{ movie.description|truncatewords:15 }}</p>
-        <a href="{% url 'movies_detail' movie.id %}" class="btn btn-primary">Book Now</a>
+        <a href="{% url 'movie_detail' movie.id %}" class="btn btn-primary">Book Now</a>
       </div>
     </div>
   </div>

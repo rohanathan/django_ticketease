@@ -1,0 +1,36 @@
+<!-- templates/movie_detail.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-4">
+    <img src="{{ movie.poster.url }}" class="img-fluid" alt="{{ movie.title }}">
+  </div>
+  <div class="col-md-8">
+    <h2>{{ movie.title }}</h2>
+    <p>{{ movie.description }}</p>
+    
+    <div class="mt-3">
+      <h5>Showtimes:</h5>
+
+      {% if movie.showtimes.all %}
+        {% for venue in venues %}
+        <div class="mb-3">
+          <h6 class="fw-bold">{{ venue.screen__venue__name }}</h6> <!-- Venue Name -->
+          
+          {% for showtime in movie.showtimes.all %}
+            {% if showtime.screen.venue.id == venue.screen__venue__id %}
+            <a href="{% url 'select_seats' movie.id showtime.id %}" class="btn btn-outline-primary btn-sm m-1">
+              Screen {{ showtime.screen.screen_number }} - {{ showtime.datetime|time:"h:i A" }}
+            </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <p>No showtimes available for this movie.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,10 +1,8 @@
 from django.urls import path
-from django.http import HttpResponse
-
-# Placeholder view to prevent errors
-def placeholder_view(request):
-    return HttpResponse("<h2>Events feature is under development.</h2>")
+from .views import event_list, event_detail, book_event
 
 urlpatterns = [
-    path('', placeholder_view, name='events_list'),  # ✅ Placeholder page
+    path('', event_list, name='events_list'),
+    path('<int:event_id>/', event_detail, name='events_detail'),
+    path('<int:event_id>/book/', book_event, name='book_event'),  # Add this line
 ]

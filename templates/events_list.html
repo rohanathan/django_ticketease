@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Events - TicketEase{% endblock %}
+
+{% block content %}
+<h2 class="fw-bold mb-3">Upcoming Events</h2>
+<div class="row">
+  {% for event in events %}
+  <div class="col-md-3 mb-3">
+    <div class="card">
+      <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}">
+      <div class="card-body">
+        <h5 class="card-title">{{ event.title }}</h5>
+        <p class="card-text">{{ event.location }}</p>
+        <p class="card-text"><strong>Date:</strong> {{ event.date }}</p>
+        <p class="card-text"><strong>Price:</strong> ₹{{ event.price }}</p>
+        <a href="{% url 'events_detail' event.id %}" class="btn btn-primary">View Details</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p>No upcoming events.</p>
+  {% endfor %}
+</div>
+{% endblock %}

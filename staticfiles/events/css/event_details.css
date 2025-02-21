@@ -1,0 +1,137 @@
+/* HERO SECTION */
+.hero-container {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    overflow: hidden;
+}
+
+.event-banner {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.85); /* Slight dim effect for better text visibility */
+}
+
+/* EVENT INFO OVERLAY */
+.event-info {
+    position: absolute;
+    bottom: 20px;
+    left: 30px;
+    right: 30px;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px 20px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.event-info h1 {
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+}
+
+.event-info p {
+    font-size: 16px;
+    margin-bottom: 0;
+}
+
+/* BOOK BUTTON */
+.book-btn {
+    background: #ff4b5c;
+    color: white;
+    padding: 10px 15px;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 5px;
+    transition: background 0.3s;
+}
+
+.book-btn:hover {
+    background: #d43f52;
+}
+
+/* MAIN CONTENT CONTAINER */
+.container {
+    padding-top: 20px;
+}
+
+/* TICKET PRICING SECTION */
+.ticket-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.ticket-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 5px;
+}
+
+/* SPEAKERS SECTION */
+.speaker {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.speaker img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.speaker p {
+    margin-bottom: 0;
+}
+
+/* MAP SECTION */
+.location-link {
+    display: block;
+    font-weight: bold;
+    color: #007bff;
+    text-decoration: underline;
+}
+
+/* RELATED EVENTS */
+.related-events li {
+    padding: 5px 0;
+    font-size: 16px;
+}
+
+.related-events li a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.related-events li a:hover {
+    text-decoration: underline;
+}
+
+/* SOCIAL SHARE BUTTONS */
+.social-buttons .btn {
+    margin-right: 5px;
+    font-weight: bold;
+}
+
+/* COUNTDOWN TIMER */
+#countdown {
+    font-size: 24px;
+    font-weight: bold;
+    color: #d43f52;
+}

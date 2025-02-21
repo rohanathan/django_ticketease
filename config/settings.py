@@ -120,7 +120,7 @@ STATICFILES_DIRS = [
 
 # Media files (User uploads)
 MEDIA_URL = "/media/"
-#MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+# MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_ROOT = BASE_DIR / "media"
 
 
@@ -139,3 +139,12 @@ DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@ticketease.com")
 
 # Stripe API Key
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")
+
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',  # Use JSONRenderer instead of Browsable API
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
+}

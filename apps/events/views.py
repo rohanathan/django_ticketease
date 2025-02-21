@@ -1,13 +1,29 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Event
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
 
+from .models import Event, EventDetail
+from .serializers import EventDetailSerializer
+
+# Event List Page
 def event_list(request):
     events = Event.objects.all()
-    return render(request, 'events_list.html', {'events': events})
+    return render(request, 'events/events_list.html', {'events': events})
 
-def event_detail(request, event_id):
-    event = get_object_or_404(Event, id=event_id)
-    return render(request, 'events_detail.html', {'event': event})
+# Booking Page
 def book_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     return render(request, 'events/book_event.html', {'event': event})
+def event_detail(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+    return render(request, 'events/events_detail.html', {'event_id': event.id,'event_location': event.location})
+
+
+
+# API for Event Details
+@api_view(['GET'])
+def event_detail_api(request, event_id):
+    event_detail = get_object_or_404(EventDetail, event__id=event_id)
+    serializer = EventDetailSerializer(event_detail)
+    return Response(serializer.data, status=status.HTTP_200_OK)

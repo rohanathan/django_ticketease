@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.title }} - TicketEase{% endblock %}
+{% load static %}
+
+
+{% block content %}
+<!-- Hero Section with Background Image -->
+<div class="hero-container">
+    <img src="/media/music_fest.jpg" alt="{{ event.title }}" 
+         class="event-banner img-fluid w-100">
+</div>
+
+<!-- Event Info Box (now outside hero-container) -->
+
+    <div class="event-info p-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="fw-bold" id="event-title"></h1>
+            <p class="lead" id="event-category"></p>
+            <p class="mb-0">
+                <strong>📅 Date:</strong> <span id="event-date"></span> | 
+                <strong>📍 Location:</strong> <span id="event-location"></span>
+            </p>
+        </div>
+        <a href="#" id="book-now-btn" class="btn btn-lg btn-danger">Book</a>
+    </div>
+
+
+
+  <!-- Event Details Section -->
+<div class="container mt-5">
+    <div class="row">
+        <!-- Event Information -->
+        <div class="col-md-8">
+            <h2>📖 About the Event</h2>
+            <p id="event-description"></p>
+
+            <!-- 🎟️ Ticket Price (Moved Up) -->
+            <h4>🎟️ Ticket Price</h4>
+            <div id="ticket-prices"></div>
+
+            <!-- 🕒 Schedule -->
+            <h4>🕒 Schedule</h4>
+            <div id="event-schedule"></div>
+
+            <!-- 🎤 Speakers -->
+            <h4>🎤 Artists</h4>
+            <div id="speakers-section"></div>
+
+            <!-- 🏆 Sponsors -->
+            <h4>🏆 Sponsors</h4>
+            <div id="sponsors-section"></div>
+
+            <!-- ⭐ Reviews -->
+            <h3>⭐ Reviews</h3>
+            <div id="reviews-section"></div>
+        </div>
+
+        <!-- Right Sidebar (Map, Related Events, Social Sharing) -->
+        <div class="col-md-4">
+            <h4>📍 Location</h4>
+           
+    <p style="display: flex; font-size: 16px; font-weight: bold; color: blue;">
+    <a href="https://www.google.com/maps?q={{ event_location|urlencode }}" 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       style="text-decoration: underline; color: blue;">
+         {{ event_location }}
+    </a>
+</p>
+
+
+
+            <h4>🔗 Related Events</h4>
+            <ul id="related-events"></ul>
+
+            <h4>📢 Share This Event</h4>
+            <a href="#" id="facebook-share" class="btn btn-primary">Facebook</a>
+            <a href="#" id="twitter-share" class="btn btn-info">Twitter</a>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="{% static 'events/css/event_details.css' %}">
+<!-- Fetch Data from API -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const eventId = "{{ event_id }}";
+
+        fetch(`/events/api/events/${eventId}/`)
+            .then(response => response.json())
+            .then(data => {
+                console.log("API Response:", data);
+
+                document.getElementById("event-title").innerText = data.event_title;
+                document.getElementById("event-category").innerText = data.event_category;
+                document.getElementById("event-date").innerText = data.event_date;
+                document.getElementById("event-location").innerText = data.event_location;
+                document.getElementById("event-description").innerText = data.description;
+                document.getElementById("book-now-btn").href = `/events/${eventId}/book/`;
+
+                // 🎟️ Populate Ticket Prices (Now Higher in the UI)
+                const ticketDiv = document.getElementById("ticket-prices");
+                ticketDiv.innerHTML = Object.keys(data.ticket_types).length > 0
+                    ? Object.entries(data.ticket_types).map(([type, price]) => `<p><strong>${type}:</strong> ₹${price}</p>`).join("")
+                    : "<p>No ticket pricing available.</p>";
+
+                // 🕒 Populate Schedule
+                const scheduleDiv = document.getElementById("event-schedule");
+                scheduleDiv.innerHTML = data.schedule.split("\n").map(item => `<p>${item}</p>`).join("");
+
+                // 🎤 Populate Speakers
+                const speakersDiv = document.getElementById("speakers-section");
+                speakersDiv.innerHTML = data.speakers.length > 0
+                    ? data.speakers.map(speaker => `
+                        <div class="speaker">
+                            <img src="${speaker.image}" alt="${speaker.name}" class="img-thumbnail" style="width: 80px; height: 80px; border-radius: 50%;">
+                            <p><strong>${speaker.name}</strong> - ${speaker.role}<br>${speaker.bio}</p>
+                        </div>
+                    `).join("")
+                    : "<p>No speakers announced.</p>";
+
+                // 🏆 Populate Sponsors
+                const sponsorsDiv = document.getElementById("sponsors-section");
+                sponsorsDiv.innerHTML = data.sponsors.length > 0 
+                    ? data.sponsors.map(sponsor => `<p>${sponsor.name} (${sponsor.sponsorship_level})</p>`).join("") 
+                    : "<p>No sponsors listed.</p>";
+
+                // ⭐ Populate Reviews
+                const reviewsDiv = document.getElementById("reviews-section");
+                reviewsDiv.innerHTML = data.reviews_enabled
+                    ? `<p>“An amazing event! Can't wait for the next one.” - Jane Doe</p>
+                       <p>“Loved the music and the atmosphere!” - John Smith</p>`
+                    : "<p>Reviews are disabled for this event.</p>";
+
+                // 📍 Google Maps Embed
+                document.getElementById("google-maps").src = data.google_maps_embed 
+                    || `https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(data.event_location)}&key=YOUR_GOOGLE_MAPS_API_KEY`;
+
+                // 🔗 Populate Related Events
+                const relatedEventsDiv = document.getElementById("related-events");
+                relatedEventsDiv.innerHTML = data.related_events.length > 0
+                    ? data.related_events.map(event => `<li><a href="/events/${event.id}/">${event.title}</a> - ${event.date}</li>`).join("")
+                    : "<p>No related events found.</p>";
+
+                // 📢 Social Sharing
+                document.getElementById("facebook-share").href = `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`;
+                document.getElementById("twitter-share").href = `https://twitter.com/intent/tweet?url=${window.location.href}&text=${data.event_title}`;
+
+                // ⏳ Countdown Timer
+                function updateCountdown() {
+                    const eventDate = new Date(data.event_date).getTime();
+                    const now = new Date().getTime();
+                    const difference = eventDate - now;
+
+                    if (difference > 0) {
+                        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                        document.getElementById("countdown").innerHTML = `${days}d ${hours}h ${minutes}m`;
+                    } else {
+                        document.getElementById("countdown").innerHTML = "Event has started!";
+                    }
+                }
+                updateCountdown();
+                setInterval(updateCountdown, 60000);
+            })
+            .catch(error => console.error("Error fetching event details:", error));
+    });
+</script>
+
+
+{% endblock %}

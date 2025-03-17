@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - TicketEase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            width: 350px;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .signup {
+            margin-top: 10px;
+        }
+        /* Error message styling */
+        .alert {
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .alert-error {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TicketEase!</h1>
+
+        <!-- section to display error messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-error">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <div class="signup">
+            Don't have an account? <a href="{% url 'signup' %}" style="color: #007bff; font-weight: bold;">Sign up</a>
+        </div>
+    </div>
+</body>
+</html>

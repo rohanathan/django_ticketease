@@ -12,6 +12,8 @@
   >
   <!-- Custom CSS (optional) -->
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
+
 </head>
 <body>
   <!-- Navbar -->
@@ -38,13 +40,33 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'events_list' %}">Events</a>
           </li>
-          <li class="nav-item">
-            <!-- Using Django built-in views -->
-            <a class="nav-link" href="{% url 'login' %}">Login</a>
-          </li>
-          <li class="nav-item">
-            <!-- Using Django built-in views -->
-            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+            {% if user.is_authenticated %}
+            <!-- Show Profile instead of Login -->
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarProfile" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px;">
+                  {% else %}
+                    <img src="{% static 'default-profile.png' %}" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px;">
+                  {% endif %}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarProfile">
+                  <li><a class="dropdown-item" href="{% url 'dashboard' %}">Dashboard</a></li>
+                  <!--<li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>-->
+                  <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="dropdown-item">Logout</button>
+                  </form>
+                
+                </ul>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Login</a>
+              </li>
+            {% endif %}
+          </ul>
+          
           </li>
         </ul>
       </div>

@@ -1,0 +1,40 @@
+/* Centering the signup form */
+.signup-container {
+    width: 400px;
+    margin: 50px auto; /* Center it */
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Input fields styling */
+.signup-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Blue button styling */
+.signup-container .btn {
+    width: 100%;
+    background-color: #007bff; /* Blue color */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.signup-container .btn:hover {
+    background-color: #0056b3; /* Darker blue */
+}
+
+/* Signup link */
+.signup-link {
+    color: #007bff;
+    font-weight: bold;
+}

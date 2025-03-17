@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="card shadow-lg p-4" style="width: 50%; border-radius: 16px; background: #f8f9fa;">
+        <h2 class="text-center mb-4">Edit Profile</h2>
+        
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="mb-3 text-center">
+                {% if user.profile_picture %}
+                    <img src="{{ user.profile_picture.url }}" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover;">
+                {% else %}
+                    <img src="/static/default-profile.png" class="rounded-circle shadow" style="width: 100px; height: 100px; object-fit: cover;">
+                {% endif %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.profile_picture.label_tag }}
+                {{ form.profile_picture }}
+            </div>
+            <div class="mb-3">
+                <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                <input type="email" name="email" id="{{ form.email.id_for_label }}" 
+                       class="form-control" value="{{ form.email.value }}">
+            </div>
+            <div class="mb-3">
+                {{ form.phone_number.label_tag }}
+                {{ form.phone_number }}
+            </div>
+            <div class="mb-3">
+                {{ form.date_of_birth.label_tag }}
+                {{ form.date_of_birth }}
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Save Changes</button>
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary w-100 mt-2">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

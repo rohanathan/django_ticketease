@@ -20,14 +20,27 @@ from django.urls import path, include
 from config.views import home  
 from django.conf.urls.static import static
 from django.conf import settings
+from django.urls import path
+from apps.users.views import signup_view
+from django.shortcuts import render
+
+
+def home(request):
+    return render(request, "home.html")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', home, name='home'),  # Define the homepage
+    path("", home, name='home'),  # Define the homepage
     path('movies/', include('apps.movies.urls')),  # Movie-related URLs
     path('events/', include('apps.events.urls')),  # "Events" has a placeholder
     path("bookings/", include("apps.bookings.urls")),  # Booking URLs added here
     path('accounts/', include('django.contrib.auth.urls')),  # Adds Django Built-in login/logout/register views
+    path("users/", include("apps.users.urls")),
+    path("", include("apps.events.urls")), 
+    path("signup/", signup_view, name="signup"),
+    path("payments/", include("apps.payments.urls")),
+     #path("notifications/", include("apps.notifications.urls")),  # Register notifications app
+
 ]
 
 if settings.DEBUG:

@@ -64,7 +64,6 @@ function confirmSeats() {
  */
 
 
-<script>
 document.addEventListener("DOMContentLoaded", function() {
     const movieId = document.getElementById("seatContainer").dataset.movieId;
     const showtimeId = document.getElementById("seatContainer").dataset.showtimeId;
@@ -148,6 +147,5 @@ function confirmSeats() {
 
     const movieId = document.getElementById("seatContainer").dataset.movieId;
     const showtimeId = document.getElementById("seatContainer").dataset.showtimeId;
-    window.location.href = `/movies/${movieId}/showtime/${showtimeId}/confirm-booking/?seats=${selectedSeats.join(",")}`;
+    window.location.href = `/bookings/${movieId}/showtime/${showtimeId}/confirm-booking/?seats=${selectedSeats.join(",")}`;
 }
-</script>

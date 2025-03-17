@@ -6,6 +6,8 @@ from .forms import CustomSignupForm
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileUpdateForm
 from django.contrib.auth.forms import AuthenticationForm
+#from apps.notifications.utils import send_email_notification
+
 
 
 def login_view(request):
@@ -61,11 +63,11 @@ def signup_view(request):
         if form.is_valid():
             user = form.save()
             # Send welcome email
-            send_notification(
-               user=user,
-                subject="Welcome to TicketEase 🎉",
-                 message=f"Hi {user.username},\n\nWelcome to TicketEase! We're excited to have you on board. 🎟️\n\nEnjoy booking events with us!\n\nBest,\nTicketEase Team"
-               )
+            #send_notification(
+              # user=user,
+               # subject="Welcome to TicketEase 🎉",
+                # message=f"Hi {user.username},\n\nWelcome to TicketEase! We're excited to have you on board. 🎟️\n\nEnjoy booking events with us!\n\nBest,\nTicketEase Team"
+              # )
             login(request, user)
             return redirect("home")  # Redirect to homepage after signup
     else:

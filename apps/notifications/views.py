@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from apps.notifications.services import notify_user_payment_success
 from .models import Payment
+#from apps.notifications.utils import send_notification
+
 
 @login_required
 def payment_success(request):

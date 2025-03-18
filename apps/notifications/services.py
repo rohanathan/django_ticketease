@@ -4,8 +4,6 @@ import logging
 from .utils import send_notification
 import logging
 
-
-
 logger = logging.getLogger(__name__)
 
 def notify_user_registration(user):
@@ -23,14 +21,12 @@ def notify_user_registration(user):
     Regards,
     TicketEase Team
     """
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [user.email]
 
-    logger.info(f"📧 Attempting to send registration email to: {user.email}")
+    send_mail(subject, message, from_email, recipient_list, fail_silently=False)
 
-    try:
-        send_notification(user.email, subject, message)
-        logger.info(f"✅ Registration email sent to {user.email}")
-    except Exception as e:
-        logger.error(f"❌ Failed to send registration email: {e}")
+    print(f" Registration email sent to {user.email}")  # Debugging
 
 
 

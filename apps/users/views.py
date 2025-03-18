@@ -13,32 +13,15 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def signup_view(request):
+def register(request):
     if request.method == "POST":
-        form = CustomSignupForm(request.POST)
+        form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            logger.info(f"✅ New user registered: {user.username}, {user.email}")
-
-            # Debug: Check if function is being called
-            print(f"📧 Calling notify_user_registration() for {user.email}")
-            logger.info(f"📧 Calling notify_user_registration() for {user.email}")
-
-            notify_user_registration(user)  # Ensure this runs
-
-            print(f"✅ Registration email function executed for {user.email}")
-            logger.info(f"✅ Registration email function executed for {user.email}")
-
-            login(request, user)
+            # Schedule email sending after the transaction commits:
+            transaction.on_commit(lambda: notify_user_registration(user))
             messages.success(request, "Registration successful! Check your email for a welcome message.")
-            return redirect("home")
-        else:
-            logger.error("❌ Registration failed due to form validation error.")
-            print("❌ Registration failed due to form validation error.")
-    else:
-        form = CustomSignupForm()
-    
-    return render(request, "registration/signup.html", {"form": form})
+            return redirect("login")
 
 
 def login_view(request):

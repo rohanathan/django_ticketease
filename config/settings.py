@@ -63,6 +63,28 @@ TEMPLATES = [
     },
 ]
 
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": os.path.join(BASE_DIR, "email_debug.log"),
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "DEBUG",
+            "propagate": True,
+        },
+    },
+}
+
+
+
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
@@ -95,7 +117,7 @@ LOGOUT_REDIRECT_URL = '/'
 
 #  Brevo SMTP Configuration
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp-relay.brevo.com"  # Ensure this matches Brevo SMTP relay
+EMAIL_HOST = "smtp.gmail.com"  # Ensure this matches Brevo SMTP relay
 EMAIL_PORT = 587  # Brevo uses port 587 for TLS
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")  # Use your Brevo email

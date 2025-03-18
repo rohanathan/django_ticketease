@@ -6,8 +6,39 @@ from .forms import CustomSignupForm
 from django.contrib.auth.decorators import login_required
 from .forms import ProfileUpdateForm
 from django.contrib.auth.forms import AuthenticationForm
-#from apps.notifications.utils import send_email_notification
+from apps.notifications.services import notify_user_registration
+import logging
 
+
+
+logger = logging.getLogger(__name__)
+
+def signup_view(request):
+    if request.method == "POST":
+        form = CustomSignupForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            logger.info(f"✅ New user registered: {user.username}, {user.email}")
+
+            # Debug: Check if function is being called
+            print(f"📧 Calling notify_user_registration() for {user.email}")
+            logger.info(f"📧 Calling notify_user_registration() for {user.email}")
+
+            notify_user_registration(user)  # Ensure this runs
+
+            print(f"✅ Registration email function executed for {user.email}")
+            logger.info(f"✅ Registration email function executed for {user.email}")
+
+            login(request, user)
+            messages.success(request, "Registration successful! Check your email for a welcome message.")
+            return redirect("home")
+        else:
+            logger.error("❌ Registration failed due to form validation error.")
+            print("❌ Registration failed due to form validation error.")
+    else:
+        form = CustomSignupForm()
+    
+    return render(request, "registration/signup.html", {"form": form})
 
 
 def login_view(request):

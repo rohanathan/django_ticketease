@@ -1,34 +1,61 @@
 import stripe
 from django.conf import settings
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.mail import send_mail  # Import email function
-from .models import Payment  # Import Payment model
-
+from apps.movies.models import Movie, Showtime
+from apps.events.models import Event  # ✅ Import Event Model
+from apps.payments.models import Payment
 
 @login_required
 def create_checkout_session(request):
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
+    category = request.GET.get("category")  # ✅ Is it a movie or event?
+    seat_count = int(request.GET.get("seats", 1)) if category == "movie" else int(request.GET.get("tickets", 1))
+
+    if category == "movie":
+        # ✅ Movie Payment Logic
+        movie_id = request.GET.get("movie_id")
+        showtime_id = request.GET.get("showtime_id")
+        movie = get_object_or_404(Movie, id=movie_id)
+        showtime = get_object_or_404(Showtime, id=showtime_id)
+        price_per_ticket = 200  # ₹200 per seat (Modify if needed)
+        total_price = seat_count * price_per_ticket
+        description = f"{movie.title} - {showtime.datetime.strftime('%Y-%m-%d %H:%M')}"
+
+    elif category == "event":
+        # ✅ Event Payment Logic
+        event_id = request.GET.get("event_id")
+        event = get_object_or_404(Event, id=event_id)
+        price_per_ticket = event.price  # Use event's price dynamically
+        total_price = seat_count * price_per_ticket
+        description = f"Event: {event.title} - {event.date.strftime('%Y-%m-%d')}"
+
+    else:
+        return render(request, "payments/error.html", {"error": "Invalid payment category."})
+
+    # ✅ Convert to smallest currency unit for Stripe
+    total_price_cents = total_price * 100
+
+    # ✅ Create Stripe Checkout Session
     checkout_session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[
             {
                 'price_data': {
-                    'currency': 'usd',
-                    'product_data': {
-                        'name': 'TicketEase Event Ticket',
-                    },
-                    'unit_amount': 2000,  # Amount in cents ($20.00)
+                    'currency': 'inr',
+                    'product_data': {'name': description},
+                    'unit_amount': total_price_cents,
                 },
                 'quantity': 1,
             },
         ],
         mode='payment',
-        success_url=request.build_absolute_uri(reverse('payment_success')) + "?session_id={CHECKOUT_SESSION_ID}",
+        success_url=request.build_absolute_uri(reverse('payment_success')) + f"?session_id={{CHECKOUT_SESSION_ID}}&category={category}",
         cancel_url=request.build_absolute_uri(reverse('payment_cancel')),
-        metadata={"user_id": request.user.id},  # Store user ID in metadata
+        metadata={"user_id": request.user.id, "category": category},
     )
 
     return redirect(checkout_session.url)

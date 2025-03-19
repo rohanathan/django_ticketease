@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Third-party apps
-    "anymail",  # Added for Brevo email integration
+    #"anymail",  # Added for Brevo email integration
 
     # TicketEase apps
     "apps.users",

@@ -3,13 +3,13 @@
 {% block title %}Events - TicketEase{% endblock %}
 
 {% block content %}
-<h2 class="fw-bold mb-3">Upcoming Events</h2>
+<h2 class="fw-bold mb-4">Upcoming Events</h2>
 
-<div class="row row-cols-1 row-cols-md-4 g-4">
+<div class="row">
   {% for event in events %}
-    <div class="col d-flex align-items-stretch">
-      <div class="card h-100">
-        <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 180px;object-fit: cover;">
+    <div class="col-md-3 mb-4 d-flex align-items-stretch">
+      <div class="card shadow-sm h-100">
+        <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 200px; object-fit: cover;">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">{{ event.title }}</h5>
           <p class="card-text">{{ event.location }}</p>
@@ -23,5 +23,4 @@
     <p>No upcoming events.</p>
   {% endfor %}
 </div>
-
 {% endblock %}

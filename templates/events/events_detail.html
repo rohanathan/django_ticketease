@@ -2,12 +2,11 @@
 
 {% block title %}{{ event.title }} - TicketEase{% endblock %}
 {% load static %}
-
+<link rel="stylesheet" href="{% static 'events/css/event_details.css' %}">
 
 {% block content %}
-<!-- Hero Section with Background Image -->
 <div class="hero-container">
-    <img src="/media/music_fest.jpg" alt="{{ event.title }}" 
+    <img src="{{ event.image.url }}" alt="{{ event.title }}" 
          class="event-banner img-fluid w-100">
 </div>
 
@@ -22,7 +21,7 @@
                 <strong>📍 Location:</strong> <span id="event-location"></span>
             </p>
         </div>
-        <a href="#" id="book-now-btn" class="btn btn-lg btn-danger">Book</a>
+        <a href="#" id="book-now-btn" class="btn btn-lg btn-danger" >Book</a>
     </div>
 
 
@@ -101,7 +100,7 @@
                 // 🎟️ Populate Ticket Prices (Now Higher in the UI)
                 const ticketDiv = document.getElementById("ticket-prices");
                 ticketDiv.innerHTML = Object.keys(data.ticket_types).length > 0
-                    ? Object.entries(data.ticket_types).map(([type, price]) => `<p><strong>${type}:</strong> ₹${price}</p>`).join("")
+                    ? Object.entries(data.ticket_types).map(([type, price]) => `<p><strong>${type}:</strong> £${price}</p>`).join("")
                     : "<p>No ticket pricing available.</p>";
 
                 // 🕒 Populate Schedule

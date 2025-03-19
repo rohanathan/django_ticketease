@@ -17,46 +17,48 @@
   </div>
 </div>
 
+
 <!-- Featured Movies Section -->
 <div class="row">
-  <h2 class="fw-bold mb-3">Featured Movies</h2>
+  <h2 class="fw-bold mb-4">Featured Movies</h2>
 
   {% for movie in featured_movies %}
-  <div class="col-md-3 mb-3">
-    <div class="card">
-      <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}">
-      <div class="card-body">
-        <h5 class="card-title">{{ movie.title }}</h5>
-        <p class="card-text">{{ movie.description|truncatewords:15 }}</p>
-        <a href="{% url 'movie_detail' movie.id %}" class="btn btn-primary">Book Now</a>
+    <div class="col-md-3 mb-4 d-flex align-items-stretch">
+      <div class="card shadow">
+        <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}" style="height:300px; object-fit:cover;">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">{{ movie.title }}</h5>
+          <p class="card-text flex-grow-1">{{ movie.description|truncatewords:15 }}</p>
+          <a href="{% url 'movie_detail' movie.id %}" class="btn btn-primary mt-auto">Book Now</a>
+        </div>
       </div>
     </div>
-  </div>
   {% empty %}
-  <p>No featured movies available.</p>
+    <p>No featured movies available.</p>
   {% endfor %}
 </div>
 
 <!-- Featured Events Section (Fix Added) -->
 <div class="row mt-5">
-  <h2 class="fw-bold mb-3">Upcoming Events</h2>
+  <h2 class="fw-bold mb-4">Upcoming Events</h2>
 
   {% if featured_events %}
     {% for event in featured_events %}
-    <div class="col-md-3 mb-3">
-      <div class="card">
-        <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}">
-        <div class="card-body">
-          <h5 class="card-title">{{ event.title }}</h5>
-          <p class="card-text"><strong>Date:</strong> {{ event.date|date:"F d, Y" }}</p>
-          <p class="card-text"><strong>Price:</strong> ${{ event.price }}</p>
-          <a href="{% url 'event_detail' event.id %}" class="btn btn-primary">View Details</a>
+      <div class="col-md-3 mb-4 d-flex align-items-stretch">
+        <div class="card shadow">
+          <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height:300px; object-fit:cover;">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ event.title }}</h5>
+            <p class="card-text"><strong>Date:</strong> {{ event.date|date:"F d, Y" }}</p>
+            <p class="card-text"><strong>Price:</strong> ${{ event.price }}</p>
+            <a href="{% url 'event_detail' event.id %}" class="btn btn-primary mt-auto">View Details</a>
+          </div>
         </div>
       </div>
-    </div>
     {% endfor %}
   {% else %}
     <p>No upcoming events available.</p>
   {% endif %}
 </div>
 {% endblock %}
+

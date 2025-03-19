@@ -6,19 +6,17 @@
     
     <p><strong>Movie:</strong> {{ movie.title }}</p>
     <p><strong>Showtime:</strong> {{ showtime.datetime }}</p>
-    <p><strong>Selected Seats:</strong></p>
-    <ul>
-        {% for seat in selected_seats %}
-            <li>{{ seat }}</li>
-        {% endfor %}
-    </ul>
+    <h5 class="card-title">Number of Seats Selected: {{ seat_count }}</h5>
+
     
     <h4>Total Price: ₹{{ total_price }}</h4>
 
-    <form action="{% url 'booking_success' movie.id showtime.id %}" method="POST">
-        {% csrf_token %}
-        <input type="hidden" name="selected_seats" value="{{ selected_seats|join:',' }}">
-        <button type="submit" class="btn btn-success">Confirm Booking</button>
+    <form action="{% url 'checkout' %}" method="GET">
+        <input type="hidden" name="category" value="movie">
+        <input type="hidden" name="movie_id" value="{{ movie.id }}">
+        <input type="hidden" name="showtime_id" value="{{ showtime.id }}">
+        <input type="hidden" name="seats" value="{{ seat_count }}">
+        <button type="submit" class="btn btn-success">Proceed to Payment</button>
     </form>
 </div>
 {% endblock %}

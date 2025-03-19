@@ -1,32 +1,32 @@
 import qrcode
 import io
 import base64
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
 from django.http import HttpResponse
 from apps.movies.models import Movie, Showtime, Seat
 from django.db.models import Sum
 
+
+
 def confirm_booking(request, movie_id, showtime_id):
-    """ Shows the selected seats for confirmation before proceeding. """
-    selected_seats = request.GET.get("seats", "").split(",")
+    """ Show booking summary based on the number of seats selected. """
+    movie = get_object_or_404(Movie, id=movie_id)
+    showtime = get_object_or_404(Showtime, id=showtime_id)
 
-    # Fetch movie & showtime details
-    movie = Movie.objects.get(id=movie_id)
-    showtime = Showtime.objects.get(id=showtime_id)
+    # Get seat count from URL parameters
+    seat_count = int(request.GET.get("seats", 1))
 
-    # Calculate total price of selected seats
-    total_price = Seat.objects.filter(
-        showtime=showtime, 
-        row__in=[s[0] for s in selected_seats], 
-        number__in=[s[1:] for s in selected_seats]
-    ).aggregate(total=Sum('price'))['total'] or 0
+    # Assume fixed pricing per seat (Modify if needed)
+    price_per_seat = 200  # Example price (₹200 per seat)
+    total_price = seat_count * price_per_seat
 
     return render(request, "bookings/confirm_booking.html", {
         "movie": movie,
         "showtime": showtime,
-        "selected_seats": selected_seats,
+        "seat_count": seat_count,
         "total_price": total_price
     })
+
 
 def booking_success(request, movie_id, showtime_id):
     """ Generates QR Code and displays booking confirmation page. """

@@ -2,47 +2,33 @@
 {% load static %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4" id="seatContainer" data-movie-id="{{ movie.id }}" data-showtime-id="{{ showtime.id }}">
     <h2 class="text-center">Select Seats for {{ movie.title }}</h2>
     <p class="text-center text-muted">{{ showtime.datetime|date:"l, F j, Y - g:i A" }}</p>
-    
+
     <div class="screen-box text-center">
         <h5>SCREEN</h5>
     </div>
 
-    <!-- ✅ Seat Quantity Selection (Placed above the seat grid) -->
+    <!-- Seat Quantity Dropdown -->
     <div class="text-center mt-3">
         <label for="seatQuantity"><strong>Select Number of Seats:</strong></label>
         <select id="seatQuantity" class="form-select w-auto d-inline">
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
+            <option value="" disabled selected>Select</option>
+            <option value="1">1 Seat</option>
+            <option value="2">2 Seats</option>
+            <option value="3">3 Seats</option>
+            <option value="4">4 Seats</option>
+            <option value="5">5 Seats</option>
+            <option value="6">6 Seats</option>
         </select>
-    </div>
-    
-    <!-- ✅ Seat Counter (Keeps track of selections) -->
-    <div id="seatCounter" class="text-center mt-2"><strong>Selected Seats: 0</strong></div>
-
-    <!-- ✅ Seat Selection Grid -->
-    <div id="seatContainer" class="seat-grid text-center" 
-         data-movie-id="{{ movie.id }}" data-showtime-id="{{ showtime.id }}">
-        <!-- Seats will be dynamically populated here -->
     </div>
 
     <div class="text-center mt-3">
-        <button class="btn btn-primary" id="confirmSeatsBtn" disabled onclick="confirmSeats()">Confirm Selection</button>
+        <button class="btn btn-primary" id="confirmSeatsBtn" disabled>Confirm Selection</button>
     </div>
 </div>
 
-<!-- ✅ Load CSS & JS from Static Files -->
-<link rel="stylesheet" href="{% static 'movies/css/select_seats.css' %}">
 <script src="{% static 'movies/js/select_seats.js' %}"></script>
 
 {% endblock %}

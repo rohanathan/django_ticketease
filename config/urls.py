@@ -51,6 +51,12 @@ from config.views import home
 from django.conf.urls.static import static
 from django.conf import settings
 from apps.users.views import signup_view
+from django.shortcuts import render
+def terms_view(request):
+    return render(request, "terms.html")
+
+def privacy_view(request):
+    return render(request, "privacy.html")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -62,6 +68,8 @@ urlpatterns = [
     path("users/", include("apps.users.urls")),
     path("signup/", signup_view, name="signup"),
     path("payments/", include("apps.payments.urls")),
+    path("terms/", terms_view, name="terms"),
+    path("privacy/", privacy_view, name="privacy"),
 ]
 
 if settings.DEBUG:

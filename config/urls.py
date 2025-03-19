@@ -36,7 +36,6 @@ urlpatterns = [
     path("bookings/", include("apps.bookings.urls")),  # Booking URLs added here
     path('accounts/', include('django.contrib.auth.urls')),  # Adds Django Built-in login/logout/register views
     path("users/", include("apps.users.urls")),
-    path("", include("apps.events.urls")), 
     path("signup/", signup_view, name="signup"),
     path("payments/", include("apps.payments.urls")),
      #path("notifications/", include("apps.notifications.urls")),  # Register notifications app

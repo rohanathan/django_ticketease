@@ -70,8 +70,8 @@
 
 
 
-            <h4>🔗 Related Events</h4>
-            <ul id="related-events"></ul>
+            
+
 
             <h4>📢 Share This Event</h4>
             <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" 
@@ -147,11 +147,7 @@
                 document.getElementById("google-maps").src = data.google_maps_embed 
                     || `https://www.google.com/maps/embed/v1/place?q=${encodeURIComponent(data.event_location)}&key=YOUR_GOOGLE_MAPS_API_KEY`;
 
-                // 🔗 Populate Related Events
-                const relatedEventsDiv = document.getElementById("related-events");
-                relatedEventsDiv.innerHTML = data.related_events.length > 0
-                    ? data.related_events.map(event => `<li><a href="/events/${event.id}/">${event.title}</a> - ${event.date}</li>`).join("")
-                    : "<p>No related events found.</p>";
+                
 
                 // 📢 Social Sharing
                 document.getElementById("facebook-share").href = `https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`;

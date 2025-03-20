@@ -27,7 +27,7 @@ def payment_success(request):
     showtime_id = metadata.get("showtime_id")
     # (For events you might use event_id)
 
-    print(f"✅ Stripe Session Retrieved: {session}")
+    print(f"Stripe Session Retrieved: {session}")
 
     # Save payment details in the database
     payment = Payment.objects.create(
@@ -39,7 +39,7 @@ def payment_success(request):
         status="success" if session.payment_status == "paid" else "failed",
     )
 
-    print(f"✅ Payment Saved: {payment}")
+    print(f"Payment Saved: {payment}")
 
     # Pass the IDs to the template so that reverse() can work
     context = {

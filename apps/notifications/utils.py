@@ -10,10 +10,10 @@ def send_notification(email, subject, message):
         send_mail(
             subject,
             message,
-            settings.DEFAULT_FROM_EMAIL,  # ✅ This ensures noreply@ticketease.com is used
+            settings.DEFAULT_FROM_EMAIL,  # This ensures noreply@ticketease.com is used
             [email],
             fail_silently=False,
         )
-        logger.info(f"✅ Email successfully sent from {settings.DEFAULT_FROM_EMAIL} to {email}")
+        logger.info(f"Email successfully sent from {settings.DEFAULT_FROM_EMAIL} to {email}")
     except Exception as e:
         logger.error(f"❌ Email sending failed: {e}")

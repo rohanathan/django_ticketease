@@ -111,7 +111,7 @@ class Command(BaseCommand):
             )
             movies[data["title"]] = movie
             if created:
-                self.stdout.write(self.style.SUCCESS(f"✅ Created movie: {movie.title}"))
+                self.stdout.write(self.style.SUCCESS(f"Created movie: {movie.title}"))
             else:
                 self.stdout.write(f"Movie already exists: {movie.title}")
 
@@ -128,7 +128,7 @@ class Command(BaseCommand):
             venue, created = Venue.objects.get_or_create(**venue_data)
             venues[venue.name] = venue
             if created:
-                self.stdout.write(self.style.SUCCESS(f"✅ Created venue: {venue.name}"))
+                self.stdout.write(self.style.SUCCESS(f"Created venue: {venue.name}"))
             else:
                 self.stdout.write(f"Venue already exists: {venue.name}")
 

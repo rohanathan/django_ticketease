@@ -54,6 +54,6 @@ def notify_user_payment_success(user, transaction_id, amount, currency, payment_
 
     try:
         send_notification(recipient_email, subject, message)
-        logger.info(f"✅ Payment email successfully sent to {recipient_email}")
+        logger.info(f"Payment email successfully sent to {recipient_email}")
     except Exception as e:
         logger.error(f"❌ Failed to send payment email: {e}")

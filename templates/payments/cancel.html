@@ -1,20 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Cancelled</title>
-</head>
-<body>
-    <h2>Payment Cancelled ❌</h2>
-    <p>Your payment was not completed. You can try again or return to the homepage.</p>
-    {% if movie_id and showtime_id %}
-    <a href="{% url 'create_checkout_session' movie_id showtime_id %}">Retry Payment</a>
-    {% elif event_id %}
-    <a href="{% url 'create_checkout_session' event_id=event_id %}">Retry Payment</a>
-    {% else %}
-    <a href="/">Return to Home</a>
-    {% endif %}
-    <a href="{% url 'create_checkout_session' %}">Retry Payment</a>
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container text-center mt-5">
+    <h2>❌ Payment Cancelled</h2>
+    <p>Your payment was not completed. Are you sure you want to cancel?</p>
+
+    <button class="btn btn-warning" onclick="goBack()">🔙 Back to Checkout</button>
+    <button class="btn btn-danger" onclick="confirmCancel()">✅ Yes, Cancel</button>
+</div>
+
+<script>
+    function goBack() {
+        history.back();  // Goes back to previous page (payment checkout)
+    }
+
+    function confirmCancel() {
+        window.location.href = "/";  // Redirect to home or another page
+    }
+</script>
+
+{% endblock %}

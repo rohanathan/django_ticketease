@@ -483,4 +483,4 @@ class Command(BaseCommand):
                 defaults={"sponsorship_level": "Silver"}
             )
 
-        self.stdout.write(self.style.SUCCESS("✅ Event details, speakers, agendas, and sponsors populated successfully!"))
+        self.stdout.write(self.style.SUCCESS("Event details, speakers, agendas, and sponsors populated successfully!"))

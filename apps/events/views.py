@@ -22,6 +22,8 @@ def event_list(request):
 def book_event(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     return render(request, 'events/book_event.html', {'event': event})
+
+
 def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
     return render(request, 'events/events_detail.html', {'event_id': event.id,'event_location': event.location,'event':event})

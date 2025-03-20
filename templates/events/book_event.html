@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Book Tickets for {{ event.title }} - TicketEase{% endblock %}
 
@@ -9,126 +10,136 @@
     <p><strong>Location:</strong> {{ event.location }}</p>
     <p><strong>Category:</strong> {{ event.category }}</p>
 
-    <!-- CSRF Token (Added for Django Security) -->
-    <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
-
+    <!-- Ticket Selection Section -->
     <h3 class="mt-4">🎟️ Select Tickets</h3>
-    <div id="ticket-selection"></div>
+    <div id="ticket-selection">
+        <!-- Ticket options will be inserted dynamically -->
+    </div>
 
-    <p id="error-message" class="text-danger fw-bold" style="display:none;">⚠️ You can select up to 5 tickets only!</p>
-    <h4 class="mt-3">Total Price: £<span id="total-price">0.00</span></h4>
+    <!-- Error Message -->
+    <p id="error-message" class="text-danger fw-bold" style="display:none;">
+        ⚠️ You can select up to 5 tickets only!
+    </p>
 
-    <button id="proceedToPayment" class="btn btn-primary" disabled>Proceed to Payment</button>
+    <!-- Total Price -->
+    <h4 class="mt-3">
+        Total Price: ₹<span id="total-price">0.00</span>
+    </h4>
+
+    <!-- Proceed Button -->
+    <button id="proceed-btn" class="btn btn-primary" disabled>
+        Proceed to Payment
+    </button>
 </div>
 
+<!-- JavaScript for Handling Ticket Selection -->
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const eventId = "{{ event.id }}";  
-        const ticketContainer = document.getElementById("ticket-selection");
-        const totalPriceElement = document.getElementById("total-price");
-        const proceedBtn = document.getElementById("proceedToPayment");
-        const csrfToken = document.getElementById("csrf_token").value; // ✅ Fetch CSRF Token
+document.addEventListener("DOMContentLoaded", function () {
+    const eventId = "{{ event.id }}";  // Get event ID from template
+    const ticketContainer = document.getElementById("ticket-selection");
+    const totalPriceElement = document.getElementById("total-price");
+    const proceedBtn = document.getElementById("proceed-btn");
+    const errorMessage = document.getElementById("error-message");
 
-        let totalTickets = 0;
-        let ticketPrices = {};
-        let selectedTickets = {};
+    let totalTickets = 0;
+    let ticketPrices = {};    // To be fetched from API: { "General": 300, "VIP": 500, ... }
+    let selectedTickets = {}; // To track how many tickets of each type are selected
 
-        // ✅ Fetch ticket types from API
-        fetch(`/events/api/events/${eventId}/`)
-            .then(response => response.json())
-            .then(data => {
-                ticketPrices = data.ticket_types;
+    // Fetch ticket types from API for this event
+    fetch(`/events/api/events/${eventId}/`)
+        .then(response => response.json())
+        .then(data => {
+            ticketPrices = data.ticket_types;
 
-                for (const [type, price] of Object.entries(ticketPrices)) {
-                    const ticketRow = document.createElement("div");
-                    ticketRow.classList.add("d-flex", "align-items-center", "mb-3");
-
-                    ticketRow.innerHTML = `
-                        <div class="flex-grow-1">
-                            <h5 class="mb-0">${type}</h5>
-                            <p class="text-muted">£${price}</p>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <button class="btn btn-outline-secondary btn-sm decrease" data-type="${type}">-</button>
-                            <span class="mx-2" id="${type}-count">0</span>
-                            <button class="btn btn-outline-secondary btn-sm increase" data-type="${type}">+</button>
-                        </div>
-                    `;
-
-                    ticketContainer.appendChild(ticketRow);
-                }
-
-                document.querySelectorAll(".increase").forEach(button => {
-                    button.addEventListener("click", function () {
-                        updateTicketCount(this.dataset.type, 1);
-                    });
-                });
-
-                document.querySelectorAll(".decrease").forEach(button => {
-                    button.addEventListener("click", function () {
-                        updateTicketCount(this.dataset.type, -1);
-                    });
-                });
-            })
-            .catch(error => console.error("Error fetching ticket details:", error));
-
-        // ✅ Function to update ticket count
-        function updateTicketCount(ticketType, change) {
-            const countElement = document.getElementById(`${ticketType}-count`);
-            let count = parseInt(countElement.innerText) + change;
-
-            if (count < 0) return;  // Prevent negative values
-            if (totalTickets + change > 5) {
-                document.getElementById("error-message").style.display = "block";
-                return;
-            }
-
-            totalTickets += change;
-            countElement.innerText = count;
-            selectedTickets[ticketType] = count;
-
-            let totalPrice = 0;
+            // For each ticket type, create UI controls
             for (const [type, price] of Object.entries(ticketPrices)) {
-                totalPrice += parseInt(document.getElementById(`${type}-count`).innerText) * parseFloat(price);
-            }
-            totalPriceElement.innerText = totalPrice.toFixed(2);
+                // Initialize selected count to zero
+                selectedTickets[type] = 0;
 
-            proceedBtn.disabled = totalTickets === 0;
+                const ticketRow = document.createElement("div");
+                ticketRow.classList.add("d-flex", "align-items-center", "mb-3");
+
+                ticketRow.innerHTML = `
+                    <div class="flex-grow-1">
+                        <h5 class="mb-0">${type}</h5>
+                        <p class="text-muted">₹${price}</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary btn-sm decrease" data-type="${type}">-</button>
+                        <span class="mx-2" id="${type}-count">0</span>
+                        <button class="btn btn-outline-secondary btn-sm increase" data-type="${type}">+</button>
+                    </div>
+                `;
+
+                ticketContainer.appendChild(ticketRow);
+            }
+
+            // Add event listeners for plus and minus buttons
+            document.querySelectorAll(".increase").forEach(button => {
+                button.addEventListener("click", function () {
+                    updateTicketCount(this.dataset.type, 1);
+                });
+            });
+
+            document.querySelectorAll(".decrease").forEach(button => {
+                button.addEventListener("click", function () {
+                    updateTicketCount(this.dataset.type, -1);
+                });
+            });
+
+            // Attach listener to Proceed button
+            proceedBtn.addEventListener("click", function () {
+                proceedToPayment();
+            });
+        })
+        .catch(error => console.error("Error fetching ticket details:", error));
+
+    // Update ticket count function
+    function updateTicketCount(ticketType, change) {
+        const countElement = document.getElementById(`${ticketType}-count`);
+        let newCount = selectedTickets[ticketType] + change;
+        if (newCount < 0) return; // Prevent negative numbers
+
+        let newTotalTickets = totalTickets + change;
+        if (newTotalTickets > 5) {
+            errorMessage.style.display = "block";
+            return;
+        }
+        errorMessage.style.display = "none";
+
+        // Update counts
+        selectedTickets[ticketType] = newCount;
+        totalTickets = newTotalTickets;
+        countElement.innerText = newCount;
+
+        // Recalculate total price
+        let totalPrice = 0;
+        for (const [type, price] of Object.entries(ticketPrices)) {
+            totalPrice += selectedTickets[type] * parseFloat(price);
+        }
+        totalPriceElement.innerText = totalPrice.toFixed(2);
+
+        // Enable the Proceed button if at least one ticket is selected
+        proceedBtn.disabled = totalTickets === 0;
+    }
+
+    // Proceed to Payment: Build URL with query parameters and redirect
+    function proceedToPayment() {
+        // For simplicity, we assume the user selects tickets for only one type.
+        // Find the first ticket type with a nonzero count.
+        let ticketType = Object.keys(selectedTickets).find(type => selectedTickets[type] > 0);
+        let ticketCount = selectedTickets[ticketType];
+
+        if (!ticketType || ticketCount === 0) {
+            alert("Please select at least one ticket!");
+            return;
         }
 
-        // ✅ Handle Proceed to Payment
-        proceedBtn.addEventListener("click", function () {
-            if (totalTickets === 0) return;
+        let pricePerTicket = ticketPrices[ticketType];
 
-            console.log("⚡ Sending payment request...");
-
-            fetch(`/events/${eventId}/create-checkout-session/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken,  // ✅ Fixed CSRF Token
-                },
-                body: JSON.stringify({
-                    category: "event",
-                    id: eventId,
-                    tickets: selectedTickets,
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("✅ Stripe Checkout Response:", data);
-                if (data.url) {
-                    window.location.href = data.url;  // ✅ Redirect to Stripe
-                } else {
-                    alert("⚠️ Payment error! Please try again.");
-                }
-            })
-            .catch(error => {
-                console.error("❌ Payment Error:", error);
-                alert("⚠️ Payment failed! Check console.");
-            });
-        });
-    });
+        // Construct URL with query parameters
+        window.location.href = `/events/${eventId}/create-checkout-session/?category=event&id=${eventId}&ticket_type=${ticketType}&tickets=${ticketCount}&price=${pricePerTicket}`;
+    }
+});
 </script>
-
 {% endblock %}

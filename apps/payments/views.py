@@ -11,44 +11,46 @@ from apps.events.models import Event
 from .models import Payment  # Payment model in apps/payments/models.py
 
 @login_required
-def create_checkout_session(request, event_id):
+def create_checkout_session(request, *args, **kwargs):
     """
-    Handles payment for both movies and events via GET request.
-    For events, event_id is captured from the URL.
-    Expected GET parameters for events:
-      - ticket_type (default "General")
-      - tickets (number)
-      - price (price per ticket)
+    A single function that handles both movies and events, capturing
+    all URL parameters in **kwargs. We'll decide logic based on whether
+    'movie_id' or 'event_id' is in kwargs.
+    
+    Example URL patterns might be:
+      - /movies/<int:movie_id>/showtime/<int:showtime_id>/payment/
+      - /events/<int:event_id>/create-checkout-session/
+    The function won't explicitly accept 'movie_id' or 'event_id' but
+    will rely on kwargs.get() to see what's passed.
     """
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    # Extract required parameters
-    category = request.GET.get("category")  # "movie" or "event"
-    # For events, use event_id from URL
-    item_id = event_id  
-    ticket_type = request.GET.get("ticket_type", "General")
+    # Extract from kwargs
+    movie_id = kwargs.get('movie_id')
+    showtime_id = kwargs.get('showtime_id')
+    event_id = kwargs.get('event_id')
+
+    # Also parse any GET parameters, e.g. ?tickets=1&price=15
     try:
         ticket_count = int(request.GET.get("tickets", 1))
     except (ValueError, TypeError):
         ticket_count = 1
 
-    if not category or not item_id:
-        return redirect(reverse("payment_cancel"))
+    try:
+        price_per_ticket = float(request.GET.get("price", 0))
+    except (ValueError, TypeError):
+        price_per_ticket = 0
 
     line_items = []
-    total_price = 0
 
-    if category == "movie":
-        # Handle Movie Payment
-        showtime_id = request.GET.get("showtime_id")
-        movie = get_object_or_404(Movie, id=item_id)
+    # Decide which domain (movie or event) to handle
+    if movie_id and showtime_id:
+        # Handle movie
+        movie = get_object_or_404(Movie, id=movie_id)
         showtime = get_object_or_404(Showtime, id=showtime_id)
 
-        try:
-            price_per_ticket = float(request.GET.get("price", 15))
-        except (ValueError, TypeError):
-            price_per_ticket = 15
-        total_price = price_per_ticket * ticket_count
+        if price_per_ticket <= 0:
+            return redirect(reverse("payment_cancel"))
 
         line_items.append({
             "price_data": {
@@ -61,29 +63,38 @@ def create_checkout_session(request, event_id):
             "quantity": ticket_count,
         })
 
-    elif category == "event":
-        # Handle Event Payment
-        event = get_object_or_404(Event, id=item_id)
+        metadata = {
+            "user_id": request.user.id,
+            "category": "movie",
+            "movie_id": movie_id,
+            "showtime_id": showtime_id,
+        }
 
-        # Access ticket_types from the related EventDetail
-        # Make sure that every Event has an associated EventDetail instance.
-        ticket_types = event.details.ticket_types  # Use the related name "details"
-        price_per_ticket = float(ticket_types.get(ticket_type, 0)) if isinstance(ticket_types, dict) else 0
+    elif event_id:
+        # Handle event
+        event = get_object_or_404(Event, id=event_id)
+        # Optionally parse a 'ticket_type' param
+        ticket_type = request.GET.get("ticket_type", "General")
 
-        if price_per_ticket == 0:
+        if price_per_ticket <= 0:
             return redirect(reverse("payment_cancel"))
-
-        total_price = price_per_ticket * ticket_count
 
         line_items.append({
             "price_data": {
                 "currency": "gbp",
-                "product_data": {"name": f"{event.title} - {ticket_type} Ticket"},
+                "product_data": {"name": f"{event.title} - {ticket_type}"},
                 "unit_amount": int(price_per_ticket * 100),
             },
             "quantity": ticket_count,
         })
+
+        metadata = {
+            "user_id": request.user.id,
+            "category": "event",
+            "event_id": event_id,
+        }
     else:
+        # If neither movie nor event is found, bail out
         return redirect(reverse("payment_cancel"))
 
     # Create Stripe Checkout Session
@@ -91,9 +102,9 @@ def create_checkout_session(request, event_id):
         payment_method_types=["card"],
         line_items=line_items,
         mode="payment",
-        success_url=request.build_absolute_uri(reverse("payment_success")) + f"?session_id={{CHECKOUT_SESSION_ID}}",
+        success_url=request.build_absolute_uri(reverse("payment_success")) + "?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=request.build_absolute_uri(reverse("payment_cancel")),
-        metadata={"user_id": request.user.id, "category": category, "item_id": item_id},
+        metadata=metadata,
     )
 
     return redirect(checkout_session.url)

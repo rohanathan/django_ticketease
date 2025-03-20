@@ -38,3 +38,21 @@
     color: #007bff;
     font-weight: bold;
 }
+
+.hero {
+    background: url("/static/images/hero.jpg") no-repeat center center;
+    background-size: cover;
+    position: relative;
+  }
+  /* optional overlay to darken the background for better text contrast */
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); 
+  }
+  .hero-content {
+    position: relative; /* so it appears above the overlay */
+    z-index: 1;
+  }
+  

@@ -5,15 +5,12 @@
 {% block title %}Home - TicketEase{% endblock %}
 
 {% block content %}
-<div class="row">
-  <!-- Banner / Hero Section -->
-  <div class="col-12 mb-4">
-    <div class="p-5 text-white bg-dark rounded-3">
-      <h1>Welcome to TicketEase!</h1>
-      <p>Discover and book tickets for movies, shows, and events around you.</p>
-      <a href="{% url 'movie_list' %}" class="btn btn-primary btn-lg">Check Movies</a>
-      <a href="{% url 'events_list' %}" class="btn btn-secondary btn-lg">Check Events</a>
-    </div>
+<div class="hero text-center text-white d-flex align-items-center justify-content-center" style="height: 400px;">
+  <div class="hero-content">
+    <h1 class="display-4 fw-bold">Welcome to TicketEase!</h1>
+    <p class="lead">Discover and book tickets for movies and events around you.</p>
+    <a href="{% url 'movie_list' %}" class="btn btn-primary btn-lg me-2">Check Movies</a>
+    <a href="{% url 'events_list' %}" class="btn btn-outline-light btn-lg">Check Events</a>
   </div>
 </div>
 

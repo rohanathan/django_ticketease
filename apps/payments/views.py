@@ -9,56 +9,43 @@ from apps.events.models import Event  # ✅ Import Event Model
 from apps.payments.models import Payment
 
 @login_required
-def create_checkout_session(request):
+def create_checkout_session(request, movie_id, showtime_id):
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    category = request.GET.get("category")  # ✅ Is it a movie or event?
-    seat_count = int(request.GET.get("seats", 1)) if category == "movie" else int(request.GET.get("tickets", 1))
+    category = request.GET.get("category", "movie")  # Default category is movie
+    seat_count = int(request.GET.get("tickets", 1))  # Number of tickets
+    price_per_ticket = int(request.GET.get("price", 15))  # Assume £15 per ticket
 
-    if category == "movie":
-        # ✅ Movie Payment Logic
-        movie_id = request.GET.get("movie_id")
-        showtime_id = request.GET.get("showtime_id")
-        movie = get_object_or_404(Movie, id=movie_id)
-        showtime = get_object_or_404(Showtime, id=showtime_id)
-        price_per_ticket = 200  # ₹200 per seat (Modify if needed)
-        total_price = seat_count * price_per_ticket
-        description = f"{movie.title} - {showtime.datetime.strftime('%Y-%m-%d %H:%M')}"
+    # ✅ Fetch movie & showtime details
+    movie = get_object_or_404(Movie, id=movie_id)
+    showtime = get_object_or_404(Showtime, id=showtime_id)
 
-    elif category == "event":
-        # ✅ Event Payment Logic
-        event_id = request.GET.get("event_id")
-        event = get_object_or_404(Event, id=event_id)
-        price_per_ticket = event.price  # Use event's price dynamically
-        total_price = seat_count * price_per_ticket
-        description = f"Event: {event.title} - {event.date.strftime('%Y-%m-%d')}"
+    total_price = seat_count * price_per_ticket  # Calculate total
 
-    else:
-        return render(request, "payments/error.html", {"error": "Invalid payment category."})
+    # ✅ Convert total price to pence (Stripe uses the smallest currency unit)
+    total_price_pence = total_price * 100  # £1 = 100 pence
 
-    # ✅ Convert to smallest currency unit for Stripe
-    total_price_cents = total_price * 100
-
-    # ✅ Create Stripe Checkout Session
+    # ✅ Create Stripe Checkout Session with GBP
     checkout_session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[
             {
                 'price_data': {
-                    'currency': 'inr',
-                    'product_data': {'name': description},
-                    'unit_amount': total_price_cents,
+                    'currency': 'gbp',  # ✅ Use GBP instead of INR
+                    'product_data': {'name': f"{movie.title} - {showtime.datetime.strftime('%Y-%m-%d %H:%M')}"},
+                    'unit_amount': total_price_pence,  # Amount in pence
                 },
                 'quantity': 1,
             },
         ],
         mode='payment',
-        success_url=request.build_absolute_uri(reverse('payment_success')) + f"?session_id={{CHECKOUT_SESSION_ID}}&category={category}",
+        success_url=request.build_absolute_uri(reverse('payment_success')) + f"?session_id={{CHECKOUT_SESSION_ID}}",
         cancel_url=request.build_absolute_uri(reverse('payment_cancel')),
-        metadata={"user_id": request.user.id, "category": category},
+        metadata={"user_id": request.user.id, "movie_id": movie_id, "showtime_id": showtime_id},
     )
 
     return redirect(checkout_session.url)
+
 
 
 @login_required

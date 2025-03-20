@@ -1,36 +1,181 @@
-<!-- templates/movie_detail.html -->
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="row">
-  <div class="col-md-4">
-    <img src="{{ movie.poster.url }}" class="img-fluid" alt="{{ movie.title }}">
-  </div>
-  <div class="col-md-8">
-    <h2>{{ movie.title }}</h2>
-    <p>{{ movie.description }}</p>
-    
-    <div class="mt-3">
-      <h5>Showtimes:</h5>
-
-      {% if movie.showtimes.all %}
-        {% for venue in venues %}
-        <div class="mb-3">
-          <h6 class="fw-bold">{{ venue.screen__venue__name }}</h6> <!-- Venue Name -->
-          
-          {% for showtime in movie.showtimes.all %}
-            {% if showtime.screen.venue.id == venue.screen__venue__id %}
-            <a href="{% url 'select_seats' movie.id showtime.id %}" class="btn btn-outline-primary btn-sm m-1">
-              Screen {{ showtime.screen.screen_number }} - {{ showtime.datetime|time:"h:i A" }}
-            </a>
-            {% endif %}
-          {% endfor %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Movie Poster -->
+        <div class="col-md-4">
+            <img src="{{ movie.poster.url }}" class="img-fluid" alt="{{ movie.title }}">
         </div>
-        {% endfor %}
-      {% else %}
-        <p>No showtimes available for this movie.</p>
-      {% endif %}
+
+        <!-- Movie Details & Selection -->
+        <div class="col-md-8">
+            <h2>{{ movie.title }}</h2>
+            <p>{{ movie.description }}</p>
+            <p><strong>Genre:</strong> {{ movie.genre }}</p>
+            <p><strong>Rating:</strong> {{ movie.get_rating_display }}</p>
+            <p><strong>Runtime:</strong> {{ movie.runtime }} mins</p>
+
+            <hr>
+
+            <!-- Select Date -->
+            <div class="mb-3">
+                <label for="datePicker" class="fw-bold">📅 Select Date:</label>
+                <input type="date" id="datePicker" class="form-control" min="{{ today|date:'Y-m-d' }}">
+            </div>
+
+            <!-- Select Venue -->
+            <div class="mb-3">
+                <label for="venuePicker" class="fw-bold">🏛 Select Venue:</label>
+                <select id="venuePicker" class="form-select">
+                    <option value="" selected disabled>Choose a venue</option>
+                    {% for venue in venues %}
+                        <option value="{{ venue.id }}">{{ venue.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Select Showtime -->
+            <div class="mb-3">
+                <label for="showtimePicker" class="fw-bold">🎬 Select Showtime:</label>
+                <select id="showtimePicker" class="form-select" disabled>
+                    <option value="" selected disabled>Select a date & venue first</option>
+                </select>
+            </div>
+
+            <!-- Select Ticket Class -->
+            <div class="mb-3">
+                <label for="ticketClassPicker" class="fw-bold">🎟️ Select Ticket Class:</label>
+                <select id="ticketClassPicker" class="form-select">
+                    <option value="15" selected>Gold (£15)</option>
+                    <option value="20">Platinum (£20)</option>
+                </select>
+            </div>
+
+            <!-- Select Number of Tickets -->
+            <div class="mb-3">
+                <label for="ticketQuantity" class="fw-bold">🔢 Select Number of Tickets:</label>
+                <select id="ticketQuantity" class="form-select" disabled>
+                    <option value="" selected disabled>Choose tickets</option>
+                    <option value="1">1 Ticket</option>
+                    <option value="2">2 Tickets</option>
+                    <option value="3">3 Tickets</option>
+                    <option value="4">4 Tickets</option>
+                    <option value="5">5 Tickets</option>
+                </select>
+            </div>
+
+            <!-- Display Total Price -->
+            <h4 class="mt-3">Total Price: £<span id="totalPrice">0.00</span></h4>
+
+            <!-- Confirm Booking Button -->
+            <div class="mt-4">
+                <button id="confirmBookingBtn" class="btn btn-primary" disabled>Confirm Booking</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
+<!-- JavaScript for Dynamic Selection -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const movieId = "{{ movie.id }}";
+        const datePicker = document.getElementById("datePicker");
+        const venuePicker = document.getElementById("venuePicker");
+        const showtimePicker = document.getElementById("showtimePicker");
+        const ticketClassPicker = document.getElementById("ticketClassPicker");
+        const ticketQuantity = document.getElementById("ticketQuantity");
+        const totalPriceElement = document.getElementById("totalPrice");
+        const confirmBookingBtn = document.getElementById("confirmBookingBtn");
+
+        let selectedDate = "";
+        let selectedVenue = "";
+        let selectedShowtime = "";
+        let selectedClass = 15;  // Default Gold price
+        let selectedQuantity = 0;
+
+        // Listen for date selection
+        datePicker.addEventListener("change", function () {
+            selectedDate = this.value;
+            updateShowtimes();
+        });
+
+        // Listen for venue selection
+        venuePicker.addEventListener("change", function () {
+            selectedVenue = this.value;
+            updateShowtimes();
+        });
+
+        function updateShowtimes() {
+    if (!selectedDate || !selectedVenue) {
+        showtimePicker.innerHTML = '<option value="" selected disabled>Select a date & venue first</option>';
+        showtimePicker.disabled = true;
+        ticketQuantity.disabled = true;
+        confirmBookingBtn.disabled = true;
+        return;
+    }
+
+    fetch(`/movies/api/showtimes/?movie_id=${movieId}&date=${selectedDate}&venue_id=${selectedVenue}`)
+        .then(response => response.json())
+        .then(data => {
+            showtimePicker.innerHTML = "";
+            if (data.length === 0) {
+                showtimePicker.innerHTML = '<option value="" selected disabled>No showtimes available</option>';
+                showtimePicker.disabled = true;
+                return;
+            }
+
+            data.forEach(showtime => {
+                let option = document.createElement("option");
+                option.value = showtime.id;
+                option.textContent = showtime.time;
+                showtimePicker.appendChild(option);
+            });
+
+            showtimePicker.disabled = false;
+        })
+        .catch(error => console.error("Error fetching showtimes:", error));
+}
+
+
+        // Enable ticket quantity selection when showtime is selected
+        showtimePicker.addEventListener("change", function () {
+            selectedShowtime = this.value;
+            ticketQuantity.disabled = false;
+        });
+
+        // Update price calculation when ticket class changes
+        ticketClassPicker.addEventListener("change", function () {
+            selectedClass = parseFloat(this.value);
+            updateTotalPrice();
+        });
+
+        // Update total price when ticket quantity changes
+        ticketQuantity.addEventListener("change", function () {
+            selectedQuantity = parseInt(this.value);
+            updateTotalPrice();
+        });
+
+        function updateTotalPrice() {
+            if (selectedQuantity > 0) {
+                let totalPrice = selectedQuantity * selectedClass;
+                totalPriceElement.innerText = totalPrice.toFixed(2);
+                confirmBookingBtn.disabled = false;
+            } else {
+                totalPriceElement.innerText = "0.00";
+                confirmBookingBtn.disabled = true;
+            }
+        }
+
+        // Redirect to payment page
+        confirmBookingBtn.addEventListener("click", function () {
+            if (!selectedShowtime || selectedQuantity === 0) return;
+
+            const url = `/movies/${movieId}/showtime/${selectedShowtime}/payment/?tickets=${selectedQuantity}&price=${selectedClass}`;
+            window.location.href = url;
+        });
+    });
+</script>
+
 {% endblock %}

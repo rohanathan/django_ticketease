@@ -11,12 +11,12 @@
     
     <h4>Total Price: ₹{{ total_price }}</h4>
 
-    <form action="{% url 'checkout' %}" method="GET">
+    <form action="{% url 'create_checkout_session' movie.id showtime.id %}" method="GET">
         <input type="hidden" name="category" value="movie">
-        <input type="hidden" name="movie_id" value="{{ movie.id }}">
-        <input type="hidden" name="showtime_id" value="{{ showtime.id }}">
-        <input type="hidden" name="seats" value="{{ seat_count }}">
+        <input type="hidden" name="tickets" value="{{ tickets }}">
+        <input type="hidden" name="price" value="{{ total_price }}">
         <button type="submit" class="btn btn-success">Proceed to Payment</button>
     </form>
+    
 </div>
 {% endblock %}

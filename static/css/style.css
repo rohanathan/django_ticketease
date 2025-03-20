@@ -55,4 +55,89 @@
     position: relative; /* so it appears above the overlay */
     z-index: 1;
   }
-  
+  /* Default (Light Mode) */
+body.light-mode .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+/* Default Light Mode */
+body.light-mode {
+    background-color: white;
+    color: black;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background-color: #121212;  /* Darker background */
+    color: white;
+}
+
+/* Ensure cards and containers also switch */
+.card {
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.dark-mode .card {
+    background-color: #1e1e1e;
+    color: white;
+}
+
+.dark-mode .navbar {
+    background-color: #212529 !important;
+}
+
+.dark-mode .footer {
+    background-color: #1e1e1e;
+    color: white;
+}
+
+/* Buttons */
+.dark-mode .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.dark-mode .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}/* Default Light Mode */
+body.light-mode {
+    background-color: #ffffff;
+    color: #000;
+}
+body.light-mode .dashboard-card {
+    background-color: #f8f9fa;
+    color: black;
+}
+body.light-mode .dashboard-title {
+    background-color: black;
+    color: white;
+}
+body.light-mode .dashboard-details {
+    background-color: white;
+    color: black;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+body.dark-mode .dashboard-card {
+    background-color: #1e1e1e;
+    color: white;
+}
+body.dark-mode .dashboard-title {
+    background-color: #333;
+    color: white;
+}
+body.dark-mode .dashboard-details {
+    background-color: #222;
+    color: white;
+}
+/* Ensure price text is visible in dark mode */
+body.dark-mode .text-muted {
+    color: white !important;
+}

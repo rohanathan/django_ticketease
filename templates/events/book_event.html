@@ -9,35 +9,31 @@
     <p><strong>Location:</strong> {{ event.location }}</p>
     <p><strong>Category:</strong> {{ event.category }}</p>
 
-    <!-- Ticket Selection Section -->
+    <!-- CSRF Token (Added for Django Security) -->
+    <input type="hidden" id="csrf_token" value="{{ csrf_token }}">
+
     <h3 class="mt-4">🎟️ Select Tickets</h3>
-    <div id="ticket-selection">
-        <!-- Ticket options will be inserted dynamically -->
-    </div>
+    <div id="ticket-selection"></div>
 
-    <!-- Error Message -->
     <p id="error-message" class="text-danger fw-bold" style="display:none;">⚠️ You can select up to 5 tickets only!</p>
-
-    <!-- Total Price -->
     <h4 class="mt-3">Total Price: £<span id="total-price">0.00</span></h4>
 
-    <!-- Proceed Button -->
-    <button id="proceed-btn" class="btn btn-primary" disabled>Proceed to Payment</button>
+    <button id="proceedToPayment" class="btn btn-primary" disabled>Proceed to Payment</button>
 </div>
 
-<!-- JavaScript for Handling Ticket Selection -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        const eventId = "{{ event.id }}";  // Get event ID from template
+        const eventId = "{{ event.id }}";  
         const ticketContainer = document.getElementById("ticket-selection");
         const totalPriceElement = document.getElementById("total-price");
-        const proceedBtn = document.getElementById("proceed-btn");
-        const errorMessage = document.getElementById("error-message");
+        const proceedBtn = document.getElementById("proceedToPayment");
+        const csrfToken = document.getElementById("csrf_token").value; // ✅ Fetch CSRF Token
 
         let totalTickets = 0;
-        let ticketPrices = {};  // Store ticket types and prices
+        let ticketPrices = {};
+        let selectedTickets = {};
 
-        // Fetch ticket types from API
+        // ✅ Fetch ticket types from API
         fetch(`/events/api/events/${eventId}/`)
             .then(response => response.json())
             .then(data => {
@@ -62,7 +58,6 @@
                     ticketContainer.appendChild(ticketRow);
                 }
 
-                // Add event listeners for ticket selection
                 document.querySelectorAll(".increase").forEach(button => {
                     button.addEventListener("click", function () {
                         updateTicketCount(this.dataset.type, 1);
@@ -77,34 +72,62 @@
             })
             .catch(error => console.error("Error fetching ticket details:", error));
 
-        // Function to update ticket count
+        // ✅ Function to update ticket count
         function updateTicketCount(ticketType, change) {
             const countElement = document.getElementById(`${ticketType}-count`);
             let count = parseInt(countElement.innerText) + change;
 
-            if (count < 0) return; // Prevent negative values
-
-            let newTotalTickets = totalTickets + change;
-
-            if (newTotalTickets > 5) {
-                errorMessage.style.display = "block";
+            if (count < 0) return;  // Prevent negative values
+            if (totalTickets + change > 5) {
+                document.getElementById("error-message").style.display = "block";
                 return;
             }
 
-            totalTickets = newTotalTickets;
-            errorMessage.style.display = "none";
+            totalTickets += change;
             countElement.innerText = count;
+            selectedTickets[ticketType] = count;
 
-            // Calculate total price
             let totalPrice = 0;
             for (const [type, price] of Object.entries(ticketPrices)) {
                 totalPrice += parseInt(document.getElementById(`${type}-count`).innerText) * parseFloat(price);
             }
             totalPriceElement.innerText = totalPrice.toFixed(2);
 
-            // Enable or disable Proceed button
             proceedBtn.disabled = totalTickets === 0;
         }
+
+        // ✅ Handle Proceed to Payment
+        proceedBtn.addEventListener("click", function () {
+            if (totalTickets === 0) return;
+
+            console.log("⚡ Sending payment request...");
+
+            fetch(`/events/${eventId}/create-checkout-session/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken,  // ✅ Fixed CSRF Token
+                },
+                body: JSON.stringify({
+                    category: "event",
+                    id: eventId,
+                    tickets: selectedTickets,
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("✅ Stripe Checkout Response:", data);
+                if (data.url) {
+                    window.location.href = data.url;  // ✅ Redirect to Stripe
+                } else {
+                    alert("⚠️ Payment error! Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error("❌ Payment Error:", error);
+                alert("⚠️ Payment failed! Check console.");
+            });
+        });
     });
 </script>
 

@@ -1,50 +1,82 @@
 import stripe
 from django.conf import settings
-from django.shortcuts import render, redirect,get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail  # Import email function
 from apps.movies.models import Movie, Showtime
-from apps.events.models import Event  # ✅ Import Event Model
-from apps.payments.models import Payment
+from apps.events.models import Event
+
+
 
 @login_required
-def create_checkout_session(request, movie_id, showtime_id):
+def create_checkout_session(request):
+    """ Handles payment for both movies & events via GET request """
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    category = request.GET.get("category", "movie")  # Default category is movie
-    seat_count = int(request.GET.get("tickets", 1))  # Number of tickets
-    price_per_ticket = int(request.GET.get("price", 15))  # Assume £15 per ticket
+    # ✅ Extract required parameters from GET request
+    category = request.GET.get("category")  # "movie" or "event"
+    item_id = request.GET.get("id")  # Movie ID or Event ID
+    ticket_type = request.GET.get("ticket_type", "General")  # Default to "General"
+    ticket_count = int(request.GET.get("tickets", 1))
 
-    # ✅ Fetch movie & showtime details
-    movie = get_object_or_404(Movie, id=movie_id)
-    showtime = get_object_or_404(Showtime, id=showtime_id)
+    if not category or not item_id:
+        return redirect(reverse("payment_cancel"))  # Redirect to cancel page
 
-    total_price = seat_count * price_per_ticket  # Calculate total
+    line_items = []
+    total_price = 0
 
-    # ✅ Convert total price to pence (Stripe uses the smallest currency unit)
-    total_price_pence = total_price * 100  # £1 = 100 pence
+    # ✅ **Handle Movie Payment**
+    if category == "movie":
+        showtime_id = request.GET.get("showtime_id")
+        movie = get_object_or_404(Movie, id=item_id)
+        showtime = get_object_or_404(Showtime, id=showtime_id)
 
-    # ✅ Create Stripe Checkout Session with GBP
-    checkout_session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[
-            {
-                'price_data': {
-                    'currency': 'gbp',  # ✅ Use GBP instead of INR
-                    'product_data': {'name': f"{movie.title} - {showtime.datetime.strftime('%Y-%m-%d %H:%M')}"},
-                    'unit_amount': total_price_pence,  # Amount in pence
-                },
-                'quantity': 1,
+        price_per_ticket = float(request.GET.get("price", 15))  # Default £15
+        total_price = price_per_ticket * ticket_count
+
+        line_items.append({
+            "price_data": {
+                "currency": "gbp",
+                "product_data": {"name": f"{movie.title} - {showtime.datetime.strftime('%Y-%m-%d %H:%M')}"},
+                "unit_amount": int(price_per_ticket * 100),  # Convert to pence
             },
-        ],
-        mode='payment',
-        success_url=request.build_absolute_uri(reverse('payment_success')) + f"?session_id={{CHECKOUT_SESSION_ID}}",
-        cancel_url=request.build_absolute_uri(reverse('payment_cancel')),
-        metadata={"user_id": request.user.id, "movie_id": movie_id, "showtime_id": showtime_id},
+            "quantity": ticket_count,
+        })
+
+    # ✅ **Handle Event Payment**
+    elif category == "event":
+        event = get_object_or_404(Event, id=item_id)
+
+        # 🔧 FIX: Retrieve ticket prices correctly
+        ticket_types = event.ticket_types  # Ensure this is a JSONField
+        price_per_ticket = float(ticket_types.get(ticket_type, 0)) if isinstance(ticket_types, dict) else 0
+
+        if price_per_ticket == 0:
+            return redirect(reverse("payment_cancel"))
+
+
+        line_items.append({
+            "price_data": {
+                "currency": "gbp",
+                "product_data": {"name": f"{event.title} - {ticket_type}"},
+                "unit_amount": int(price_per_ticket * 100),
+            },
+            "quantity": ticket_count,
+        })
+
+    # ✅ **Create Stripe Checkout Session**
+    checkout_session = stripe.checkout.Session.create(
+        payment_method_types=["card"],
+        line_items=line_items,
+        mode="payment",
+        success_url=request.build_absolute_uri(reverse("payment_success")) + f"?session_id={{CHECKOUT_SESSION_ID}}",
+        cancel_url=request.build_absolute_uri(reverse("payment_cancel")),
+        metadata={"user_id": request.user.id, "category": category, "item_id": item_id},
     )
 
-    return redirect(checkout_session.url)
+    return redirect(checkout_session.url)  # ✅ **Redirect to Stripe Checkout**
+
+
 
 
 

@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Book Tickets for {{ movie.title }} - TicketEase{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="fw-bold">Booking for {{ movie.title }}</h2>
+    <p><strong>Genre:</strong> {{ movie.genre }}</p>
+    <p><strong>Rating:</strong> {{ movie.rating }}</p>
+    <p><strong>Runtime:</strong> {{ movie.runtime }} mins</p>
+
+    <!-- Date Selection -->
+    <h3 class="mt-4">📅 Select Date</h3>
+    <input type="date" id="movie-date" class="form-control" min="2025-04-01" max="2025-04-20">
+
+    <!-- Venue Selection -->
+    <h3 class="mt-4">🏛️ Select Venue</h3>
+    <select id="venue-dropdown" class="form-control">
+        <option value="" selected disabled>Choose Venue</option>
+    </select>
+
+    <!-- Screen Selection -->
+    <h3 class="mt-4">🎥 Select Screen</h3>
+    <select id="screen-dropdown" class="form-control" disabled>
+        <option value="" selected disabled>Choose Screen</option>
+    </select>
+
+    <!-- Showtime Selection -->
+    <h3 class="mt-4">⏰ Select Showtime</h3>
+    <select id="showtime-dropdown" class="form-control" disabled>
+        <option value="" selected disabled>Choose Showtime</option>
+    </select>
+
+    <!-- Ticket Selection -->
+    <h3 class="mt-4">🎟️ Select Tickets</h3>
+    <div id="ticket-selection">
+        <!-- Ticket options will be inserted dynamically -->
+    </div>
+
+    <!-- Error Message -->
+    <p id="error-message" class="text-danger fw-bold" style="display:none;">⚠️ You can select up to 5 tickets only!</p>
+
+    <!-- Total Price -->
+    <h4 class="mt-3">Total Price: £<span id="total-price">0.00</span></h4>
+
+    <!-- Proceed to Payment -->
+    <form id="payment-form" action="{% url 'checkout' %}" method="GET">
+        <input type="hidden" name="type" value="movie">
+        <input type="hidden" name="movie_id" value="{{ movie.id }}">
+        <input type="hidden" id="selected_showtime" name="showtime_id">
+        <input type="hidden" id="ticket_count" name="ticket_count" value="0">
+        <input type="hidden" id="total_price" name="total_price" value="0">
+        <button type="submit" id="proceed-btn" class="btn btn-primary" disabled>Proceed to Payment</button>
+    </form>
+</div>
+
+<!-- JavaScript for Handling Ticket Selection -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const movieId = "{{ movie.id }}";
+        const dateInput = document.getElementById("movie-date");
+        const venueDropdown = document.getElementById("venue-dropdown");
+        const screenDropdown = document.getElementById("screen-dropdown");
+        const showtimeDropdown = document.getElementById("showtime-dropdown");
+        const ticketContainer = document.getElementById("ticket-selection");
+        const totalPriceElement = document.getElementById("total-price");
+        const proceedBtn = document.getElementById("proceed-btn");
+        const errorMessage = document.getElementById("error-message");
+
+        let totalTickets = 0;
+        let ticketPrices = {};
+
+        // Load venues
+        fetch(`/api/venues/`)
+            .then(response => response.json())
+            .then(data => {
+                data.venues.forEach(venue => {
+                    const option = document.createElement("option");
+                    option.value = venue.id;
+                    option.textContent = venue.name;
+                    venueDropdown.appendChild(option);
+                });
+            });
+
+        // Load screens when venue is selected
+        venueDropdown.addEventListener("change", function () {
+            screenDropdown.innerHTML = '<option value="" selected disabled>Choose Screen</option>';
+            screenDropdown.disabled = false;
+
+            fetch(`/api/screens/?venue_id=${this.value}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.screens.forEach(screen => {
+                        const option = document.createElement("option");
+                        option.value = screen.id;
+                        option.textContent = `Screen ${screen.screen_number}`;
+                        screenDropdown.appendChild(option);
+                    });
+                });
+        });
+
+        // Load showtimes when screen is selected
+        screenDropdown.addEventListener("change", function () {
+            showtimeDropdown.innerHTML = '<option value="" selected disabled>Choose Showtime</option>';
+            showtimeDropdown.disabled = false;
+
+            fetch(`/api/showtimes/?movie_id=${movieId}&screen_id=${this.value}&date=${dateInput.value}`)
+                .then(response => response.json())
+                .then(data => {
+                    data.showtimes.forEach(showtime => {
+                        const option = document.createElement("option");
+                        option.value = showtime.id;
+                        option.textContent = showtime.datetime;
+                        showtimeDropdown.appendChild(option);
+                    });
+                });
+        });
+
+        // Load ticket options when showtime is selected
+        showtimeDropdown.addEventListener("change", function () {
+            ticketContainer.innerHTML = "";
+            totalTickets = 0;
+            ticketPrices = { "Standard": 10.00, "Premium": 15.00 }; // Static pricing
+
+            for (const [type, price] of Object.entries(ticketPrices)) {
+                const ticketRow = document.createElement("div");
+                ticketRow.classList.add("d-flex", "align-items-center", "mb-3");
+
+                ticketRow.innerHTML = `
+                    <div class="flex-grow-1">
+                        <h5 class="mb-0">${type}</h5>
+                        <p class="text-muted">£${price}</p>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <button class="btn btn-outline-secondary btn-sm decrease" data-type="${type}">-</button>
+                        <span class="mx-2" id="${type}-count">0</span>
+                        <button class="btn btn-outline-secondary btn-sm increase" data-type="${type}">+</button>
+                    </div>
+                `;
+
+                ticketContainer.appendChild(ticketRow);
+            }
+
+            document.querySelectorAll(".increase").forEach(button => {
+                button.addEventListener("click", function () {
+                    updateTicketCount(this.dataset.type, 1);
+                });
+            });
+
+            document.querySelectorAll(".decrease").forEach(button => {
+                button.addEventListener("click", function () {
+                    updateTicketCount(this.dataset.type, -1);
+                });
+            });
+        });
+
+        // Function to update ticket count
+        function updateTicketCount(ticketType, change) {
+            const countElement = document.getElementById(`${ticketType}-count`);
+            let count = parseInt(countElement.innerText) + change;
+
+            if (count < 0) return; // Prevent negative values
+
+            let newTotalTickets = totalTickets + change;
+
+            if (newTotalTickets > 5) {
+                errorMessage.style.display = "block";
+                return;
+            }
+
+            totalTickets = newTotalTickets;
+            errorMessage.style.display = "none";
+            countElement.innerText = count;
+
+            // Calculate total price
+            let totalPrice = 0;
+            for (const [type, price] of Object.entries(ticketPrices)) {
+                totalPrice += parseInt(document.getElementById(`${type}-count`).innerText) * parseFloat(price);
+            }
+            totalPriceElement.innerText = totalPrice.toFixed(2);
+
+            // Enable Proceed button
+            proceedBtn.disabled = totalTickets === 0;
+            document.getElementById("selected_showtime").value = showtimeDropdown.value;
+            document.getElementById("ticket_count").value = totalTickets;
+            document.getElementById("total_price").value = totalPrice;
+        }
+    });
+</script>
+
+{% endblock %}

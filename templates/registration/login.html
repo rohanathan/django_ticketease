@@ -78,10 +78,19 @@
 
         <!-- section to display error messages -->
         {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-error">{{ message }}</div>
-            {% endfor %}
+           {% for message in messages %}
+               <div class="alert alert-error">{{ message }}</div>
+           {% endfor %}
+           {% if request.path == "/login/" %}
+               <script>
+                 // Clear messages after they are displayed once
+                setTimeout(() => {
+                   document.querySelectorAll('.alert').forEach(alert => alert.remove());
+                }, 3000); // Removes after 3 seconds
+               </script>
+            {% endif %}
         {% endif %}
+
 
         <form method="POST">
             {% csrf_token %}

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm
-from django.contrib.auth import login, get_user_model
+from django.contrib.auth import login, get_user_model, logout
 from django.contrib import messages
 from .forms import CustomSignupForm, ProfileUpdateForm
 from django.contrib.auth.decorators import login_required
@@ -22,6 +22,7 @@ def signup_view(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            transaction.on_commit(lambda: notify_user_registration(user)) 
             messages.success(request, "Registration successful! Redirecting you to login...")
             return redirect("registration_success")  # Redirect to success page
     else:
@@ -33,6 +34,10 @@ def signup_view(request):
 
 # Login View
 def login_view(request):
+
+ # Force clear messages before rendering the login page
+    request.session.pop('_messages', None)   
+
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -45,6 +50,16 @@ def login_view(request):
     else:
         form = AuthenticationForm()
     return render(request, "registration/login.html", {"form": form})
+
+
+#Logout View
+
+def logout_view(request):
+    logout(request)
+    request.session.flush()
+    return redirect("home")  # Redirect to homepage
+
+
 
 
 # Dashboard View

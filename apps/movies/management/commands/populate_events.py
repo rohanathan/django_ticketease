@@ -154,6 +154,56 @@ class Command(BaseCommand):
             }
         }
 
+        # --- Create EventDetail for Events 6-10 ---
+        details_data_6_10 = {
+            "The Wombats - Everything Everything": {
+                "description": "The Wombats present 'Everything Everything', a night of indie-rock hits.",
+                "schedule": "8:00 PM - 11:00 PM",
+                "capacity": 12000,
+                "google_maps_embed": "https://www.google.com/maps/?q=OVO Hydro, Glasgow",
+                "social_media_links": {"twitter": "http://twitter.com/thewombats"},
+                "reviews_enabled": True,
+                "ticket_types": {"Regular": 45.00, "VIP Access": 99.99}
+            },
+            "Wardruna - Nordic Music Experience": {
+                "description": "A powerful live Nordic music experience by Wardruna.",
+                "schedule": "7:00 PM - 10:00 PM",
+                "capacity": 3000,
+                "google_maps_embed": "https://www.google.com/maps/?q=SEC Armadillo, Glasgow",
+                "social_media_links": {"facebook": "http://facebook.com/wardruna"},
+                "reviews_enabled": True,
+                "ticket_types": {"Standard Seat": 50.00, "VIP Meet & Greet": 120.00}
+            },
+            "Gabrielle - The Hits Live": {
+                "description": "Gabrielle takes the stage to perform her classic hits live.",
+                "schedule": "8:00 PM - 10:00 PM",
+                "capacity": 3000,
+                "google_maps_embed": "https://www.google.com/maps/?q=SEC Armadillo, Glasgow",
+                "social_media_links": {"instagram": "http://instagram.com/gabrielleuk"},
+                "reviews_enabled": True,
+                "ticket_types": {"General Admission": 34.99, "Front Row": 89.99}
+            },
+            "Nikita Kuzmin - Midnight Dancer": {
+                "description": "An evening of breathtaking dance performances by Nikita Kuzmin.",
+                "schedule": "7:30 PM - 10:00 PM",
+                "capacity": 2500,
+                "google_maps_embed": "https://www.google.com/maps/?q=SEC Armadillo, Glasgow",
+                "social_media_links": {"facebook": "http://facebook.com/nikitakuzmin"},
+                "reviews_enabled": True,
+                "ticket_types": {"Regular Seat": 29.99, "VIP Experience": 79.99}
+            },
+            "Jeff Wayne's War of the Worlds": {
+                "description": "Jeff Wayne's spectacular musical version of 'War of the Worlds' comes to life.",
+                "schedule": "7:30 PM - 10:30 PM",
+                "capacity": 13500,
+                "google_maps_embed": "https://www.google.com/maps/?q=OVO Hydro, Glasgow",
+                "social_media_links": {"twitter": "http://twitter.com/jeffwaynewotw"},
+                "reviews_enabled": True,
+                "ticket_types": {"Standard": 79.99, "Golden Circle": 159.99}
+            }
+        }
+
+
         for title, detail in details_data.items():
             event = events.get(title)
             if event:
@@ -174,6 +224,30 @@ class Command(BaseCommand):
                     self.stdout.write(f"Created EventDetail for: {title}")
                 else:
                     self.stdout.write(f"EventDetail already exists for: {title}")
+
+        
+        # --- Create EventDetail for Events 6-10 ---
+        for title, detail in details_data_6_10.items():
+            event = events.get(title)
+            if event:
+                ed, created = EventDetail.objects.get_or_create(
+                    event=event,
+                    defaults={
+                        "description": detail["description"],
+                        "schedule": detail["schedule"],
+                        "capacity": detail["capacity"],
+                        "countdown_start": now(),
+                        "google_maps_embed": detail["google_maps_embed"],
+                        "social_media_links": detail["social_media_links"],
+                        "reviews_enabled": detail["reviews_enabled"],
+                        "ticket_types": detail["ticket_types"],
+                    }
+                )
+                if created:
+                    self.stdout.write(f"Created EventDetail for: {title}")
+                else:
+                    self.stdout.write(f"EventDetail already exists for: {title}")
+
 
         # --- Create Speakers, Agendas, and Sponsors for Events 1-5 ---
         # Event 1: WWE Monday Night Raw

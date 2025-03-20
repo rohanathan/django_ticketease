@@ -4,6 +4,9 @@ import logging
 from .utils import send_notification
 import logging
 
+from django.conf import settings  # Import settings for email configurations
+from django.core.mail import send_mail
+
 logger = logging.getLogger(__name__)
 
 def notify_user_registration(user):

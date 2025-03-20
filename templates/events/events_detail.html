@@ -4,6 +4,7 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'events/css/event_details.css' %}">
 
+
 {% block content %}
 <div class="hero-container">
     <img src="{{ event.image.url }}" alt="{{ event.title }}" 
@@ -56,39 +57,33 @@
         </div>
 
         <!-- Right Sidebar (Map, Related Events, Social Sharing) -->
-        <div class="col-md-4">
-            <h4>📍 Location</h4>
-           
+<div class="col-md-4">
+    <h4 style="color: black;" >📍 Location</h4>
     <p style="display: flex; font-size: 16px; font-weight: bold; color: blue;">
-    <a href="https://www.google.com/maps?q={{ event_location|urlencode }}" 
+        <a href="https://www.google.com/maps?q={{ event_location|urlencode }}" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           style="text-decoration: underline; color: blue;">
+             {{ event_location }}
+        </a>
+    </p>
+
+    <h4 style="color: black;">📢 Share This Event</h4>
+    <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" 
        target="_blank" 
        rel="noopener noreferrer" 
-       style="text-decoration: underline; color: blue;">
-         {{ event_location }}
+       class="btn btn-primary">
+       Facebook
     </a>
-</p>
 
+    <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ event.title }}" 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       class="btn btn-info">
+       Twitter
+    </a>
+</div>
 
-
-            
-
-
-            <h4>📢 Share This Event</h4>
-            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" 
-   target="_blank" 
-   rel="noopener noreferrer" 
-   class="btn btn-primary">
-   Facebook
-</a>
-
-<!-- Twitter Share -->
-<a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ event.title }}" 
-   target="_blank" 
-   rel="noopener noreferrer" 
-   class="btn btn-info">
-   Twitter
-</a>
-        </div>
     </div>
 </div>
 <link rel="stylesheet" href="{% static 'events/css/event_details.css' %}">

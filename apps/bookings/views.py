@@ -5,8 +5,7 @@ from django.shortcuts import render,get_object_or_404
 from django.http import HttpResponse
 from apps.movies.models import Movie, Showtime, Seat
 from django.db.models import Sum
-
-
+from .models import Booking
 
 def confirm_booking(request, movie_id, showtime_id):
     """ Show booking summary based on the number of seats selected. """
@@ -28,18 +27,28 @@ def confirm_booking(request, movie_id, showtime_id):
     })
 
 
+
 def booking_success(request, movie_id, showtime_id):
-    """ Generates QR Code and displays booking confirmation page. """
-    selected_seats = request.POST.get("selected_seats", "").split(",")
+    movie = get_object_or_404(Movie, id=movie_id)
+    showtime = get_object_or_404(Showtime, id=showtime_id)
 
-    # Fetch movie & showtime details
-    movie = Movie.objects.get(id=movie_id)
-    showtime = Showtime.objects.get(id=showtime_id)
+    # Ensure we fetch the correct booking
+    booking = Booking.objects.filter(
+        user=request.user, movie=movie, showtime=showtime
+    ).order_by("-created_at").first()
 
-    # Generate QR Code with Booking Details
-    qr_data = f"Movie: {movie.title}\nShowtime: {showtime.datetime}\nSeats: {', '.join(selected_seats)}"
+    if not booking:
+        return redirect(reverse("payment_cancel"))  # Redirect if booking not found
+
+    # Generate QR Code again
+    qr_data = f"""
+    Booking Confirmation:
+    🎬 Movie: {movie.title}
+    🕒 Showtime: {showtime.datetime}
+    🎟️ Seats: {booking.seat_count}
+    💰 Total Price: {booking.total_price}
+    """
     qr = qrcode.make(qr_data)
-    
     buffer = io.BytesIO()
     qr.save(buffer, format="PNG")
     qr_code_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
@@ -47,6 +56,8 @@ def booking_success(request, movie_id, showtime_id):
     return render(request, "bookings/booking_success.html", {
         "movie": movie,
         "showtime": showtime,
-        "selected_seats": selected_seats,
+        "seat_count": booking.seat_count,
+        "total_price": booking.total_price,
         "qr_code_data": qr_code_data,
+        "booking": booking,
     })

@@ -1,16 +1,20 @@
-{% extends 'base.html' %}
-
+{% extends "base.html" %}
 {% block content %}
-<div class="container mt-4 text-center">
-    <h2>Booking Confirmed 🎉</h2>
+<div class="container mt-5 text-center">
+    <h2 class="fw-bold">Booking Successful 🎉</h2>
+    <p>Movie: {{ movie.title }}</p>
+    <p>Showtime: {{ showtime.datetime }}</p>
+    <p>Number of Seats: {{ seat_count }}</p>
+    <p>Total Price: {{ total_price }} (in your currency)</p>
     
-    <p><strong>Movie:</strong> {{ movie.title }}</p>
-    <p><strong>Showtime:</strong> {{ showtime.datetime }}</p>
-    <p><strong>Seats:</strong> {{ selected_seats|join:", " }}</p>
-
-    <h4>Scan your QR Code</h4>
-    <img src="data:image/png;base64,{{ qr_code_data }}" alt="Booking QR Code">
-
-    <p>Show this QR code at the cinema for entry.</p>
+    <div>
+        <h4>Your QR Code:</h4>
+        <img src="data:image/png;base64,{{ qr_code_data }}" alt="QR Code">
+    </div>
+    {% if movie and showtime %}
+    <a href="{% url 'booking_success' movie_id=movie.id showtime_id=showtime.id %}" class="btn btn-primary mt-3">
+      View Booking Details
+    </a>
+  {% endif %}
 </div>
 {% endblock %}

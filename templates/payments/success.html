@@ -1,36 +1,32 @@
-{% extends "base.html" %}
-{% load static %}
-
-{% block title %}Payment Successful{% endblock %}
-
 {% block content %}
 <div class="container mt-5 text-center">
     <h2 class="fw-bold">Payment Successful 🎉</h2>
     <p>Your payment was processed successfully!</p>
     <p>You will be redirected to your booking confirmation page in <span id="countdown">5</span> seconds.</p>
     
-    <!-- Provide a fallback link in case JavaScript is disabled -->
-    <a href="{% url 'confirm_booking' %}" class="btn btn-primary mt-3">Go to Booking Confirmation</a>
+    {% if movie_id and showtime_id %}
+        <p>You will be redirected to your booking confirmation page in <span id="countdown">5</span> seconds.</p>
+        <a href="{% url 'booking_success' movie_id=movie_id showtime_id=showtime_id %}" class="btn btn-primary mt-3">
+            Go to Booking Confirmation
+        </a>
+    {% else %}
+        <p>Booking details are missing. Please check your email for confirmation.</p>
+    {% endif %}
 </div>
 
 <script>
-// Number of seconds before redirect
-let timeLeft = 5;
-
-// Where do we want to redirect?
-// If you have a specific booking-confirmation URL that needs arguments,
-// you can dynamically build that here. Example:
-const redirectUrl = "{% url 'confirm_booking' %}";
-
-// Update the countdown text every second
-const countdownEl = document.getElementById('countdown');
-const interval = setInterval(() => {
-    timeLeft--;
-    countdownEl.textContent = timeLeft;
-    if (timeLeft <= 0) {
-        clearInterval(interval);
-        window.location.href = redirectUrl;
-    }
-}, 1000);
+    // Redirect after 5 seconds
+    let timeLeft = 5;
+    const redirectUrl = "{% url 'booking_success' movie_id=movie_id showtime_id=showtime_id %}";
+    const countdownElement = document.getElementById("countdown");
+    
+    const timer = setInterval(() => {
+        timeLeft--;
+        countdownElement.textContent = timeLeft;
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            window.location.href = redirectUrl;
+        }
+    }, 1000);
 </script>
 {% endblock %}

@@ -8,7 +8,13 @@
 <body>
     <h2>Payment Cancelled ❌</h2>
     <p>Your payment was not completed. You can try again or return to the homepage.</p>
-    <a href="/">Return to Home</a> |
+    {% if movie_id and showtime_id %}
+    <a href="{% url 'create_checkout_session' movie_id showtime_id %}">Retry Payment</a>
+    {% elif event_id %}
+    <a href="{% url 'create_checkout_session' event_id=event_id %}">Retry Payment</a>
+    {% else %}
+    <a href="/">Return to Home</a>
+    {% endif %}
     <a href="{% url 'create_checkout_session' %}">Retry Payment</a>
 </body>
 </html>

@@ -87,3 +87,5 @@ def book_tickets(request, movie_id, showtime_id):
         "showtime": showtime,
     }
     return render(request, "movies/book_tickets.html", context)
+
+

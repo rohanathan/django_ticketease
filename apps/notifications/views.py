@@ -1,35 +1,51 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from apps.notifications.services import notify_user_payment_success
 from .models import Payment
 import logging
+import stripe
+from django.conf import settings
+from django.urls import reverse
+
 
 logger = logging.getLogger(__name__)
 
 @login_required
 def payment_success(request):
+    stripe.api_key = settings.STRIPE_SECRET_KEY
     session_id = request.GET.get("session_id")
-    logger.info(f"🛒 Payment successful, checking session_id: {session_id}")
 
-    # Fetch the payment object
-    payment = Payment.objects.filter(stripe_checkout_id=session_id).first()
+    if not session_id:
+        print("❌ session_id is missing!")
+        return render(request, "payments/success.html", {"error": "Missing session ID"})
 
-    if payment:
-        logger.info(f"✅ Payment found: {payment.transaction_id}, User: {payment.user.username}")
+    session = stripe.checkout.Session.retrieve(session_id)
+    
+    # Retrieve metadata from the session
+    metadata = session.metadata  # This should be a dict with our IDs
+    movie_id = metadata.get("movie_id")
+    showtime_id = metadata.get("showtime_id")
+    # (For events you might use event_id)
 
-        # Update payment status
-        payment.status = "success"
-        payment.save()
+    print(f"✅ Stripe Session Retrieved: {session}")
 
-        # Notify user via email
-        notify_user_payment_success(
-            user=payment.user,
-            transaction_id=payment.transaction_id,
-            amount=payment.amount,
-            currency=payment.currency,
-            payment_email=payment.user.email  # Ensure this is passed correctly
-        )
-    else:
-        logger.error(f"❌ Payment not found for session ID: {session_id}")
+    # Save payment details in the database
+    payment = Payment.objects.create(
+        user=request.user,
+        transaction_id=session.id,
+        stripe_checkout_id=session.id,
+        amount=session.amount_total / 100,
+        currency=session.currency.upper(),
+        status="success" if session.payment_status == "paid" else "failed",
+    )
 
-    return render(request, "payments/payment_success.html")
+    print(f"✅ Payment Saved: {payment}")
+
+    # Pass the IDs to the template so that reverse() can work
+    context = {
+        "payment": payment,
+        "movie_id": movie_id,
+        "showtime_id": showtime_id,
+    }
+
+    return render(request, "payments/success.html", context)

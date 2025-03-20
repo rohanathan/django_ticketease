@@ -19,7 +19,7 @@ class Command(BaseCommand):
         for row in seat_rows:
             for num in range(1, seats_per_row + 1):  
                 seat_class = 'Gold' if row in ['A', 'B', 'C', 'D'] else 'Diamond'
-                price = 150 if seat_class == 'Gold' else 200
+                price = 15 if seat_class == 'Gold' else 20
 
                 Seat.objects.create(
                     showtime=showtime,

@@ -74,8 +74,20 @@
             <ul id="related-events"></ul>
 
             <h4>📢 Share This Event</h4>
-            <a href="#" id="facebook-share" class="btn btn-primary">Facebook</a>
-            <a href="#" id="twitter-share" class="btn btn-info">Twitter</a>
+            <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}" 
+   target="_blank" 
+   rel="noopener noreferrer" 
+   class="btn btn-primary">
+   Facebook
+</a>
+
+<!-- Twitter Share -->
+<a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ event.title }}" 
+   target="_blank" 
+   rel="noopener noreferrer" 
+   class="btn btn-info">
+   Twitter
+</a>
         </div>
     </div>
 </div>

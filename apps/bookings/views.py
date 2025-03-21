@@ -8,21 +8,22 @@ from django.db.models import Sum
 from .models import Booking
 
 def confirm_booking(request, movie_id, showtime_id):
-    """ Show booking summary based on the number of seats selected. """
     movie = get_object_or_404(Movie, id=movie_id)
     showtime = get_object_or_404(Showtime, id=showtime_id)
+    selected_seats = request.GET.get("seats", "").split(",")
 
-    # Get seat count from URL parameters
-    seat_count = int(request.GET.get("seats", 1))
+    seat_details = []
+    total_price = 0
+    for seat in selected_seats:
+        row = seat[0]  # Extract row (A, B, C, etc.)
+        price = 20 if row in ["A", "B"] else 15
+        seat_details.append({"seat": seat, "price": price})
+        total_price += price
 
-    # Assume fixed pricing per seat (Modify if needed)
-    price_per_seat = 200  # Example price (₹200 per seat)
-    total_price = seat_count * price_per_seat
-
-    return render(request, "bookings/confirm_booking.html", {
+    return render(request, "movies/confirm_booking.html", {
         "movie": movie,
         "showtime": showtime,
-        "seat_count": seat_count,
+        "seats": seat_details,
         "total_price": total_price
     })
 

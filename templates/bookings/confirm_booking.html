@@ -1,22 +1,10 @@
-{% extends 'base.html' %}
-
-{% block content %}
-<div class="container mt-4">
-    <h2 class="text-center">Confirm Your Booking</h2>
-    
-    <p><strong>Movie:</strong> {{ movie.title }}</p>
-    <p><strong>Showtime:</strong> {{ showtime.datetime }}</p>
-    <h5 class="card-title">Number of Seats Selected: {{ seat_count }}</h5>
-
-    
-    <h4>Total Price: ₹{{ total_price }}</h4>
-
-    <form action="{% url 'create_checkout_session' movie.id showtime.id %}" method="GET">
-        <input type="hidden" name="category" value="movie">
-        <input type="hidden" name="tickets" value="{{ tickets }}">
-        <input type="hidden" name="price" value="{{ total_price }}">
-        <button type="submit" class="btn btn-success">Proceed to Payment</button>
-    </form>
-    
-</div>
-{% endblock %}
+<h2>Confirm Your Booking</h2>
+<p>Movie: {{ movie.title }}</p>
+<p>Showtime: {{ showtime.datetime }}</p>
+<ul>
+    {% for seat in seats %}
+        <li>Seat {{ seat.seat }} - £{{ seat.price }}</li>
+    {% endfor %}
+</ul>
+<h3>Total Price: £{{ total_price }}</h3>
+<a href="{% url 'create_checkout_session' movie.id showtime.id %}" class="btn btn-primary">Proceed to Payment</a>

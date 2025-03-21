@@ -37,7 +37,7 @@ To check if Poetry is installed, run:
 
 `poetry --version`
 
-**✅ Output should be something like:**
+**Output should be something like:**
 
 
 `Poetry 1.8.0`
@@ -54,7 +54,7 @@ Go to a folder where you want to keep the project and **clone the repository**:
 `git clone https://2980262S@dev.azure.com/2980262S/ticketease/_git/ticketease`
 `cd ticketease`
 
-✅ **Ensure that you are inside the `ticketease` project folder before proceeding.**
+**Ensure that you are inside the `ticketease` project folder before proceeding.**
 
 ---
 
@@ -69,7 +69,7 @@ Run:
 
 `poetry install`
 
-✅ **This will automatically create a virtual environment and install all required dependencies.**
+**This will automatically create a virtual environment and install all required dependencies.**
 
 If you face **any issues** like `poetry not found`, restart the terminal and try again.
 
@@ -82,7 +82,7 @@ Before running Django commands, **activate the virtual environment**:
 
 `poetry shell`
 
-✅ **Once activated, your terminal should show something like this:**
+**Once activated, your terminal should show something like this:**
 
 
 `(ticketease-py3.12) user@hostname:~/ticketease$`

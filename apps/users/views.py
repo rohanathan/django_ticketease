@@ -10,33 +10,34 @@ from django.core.mail import send_mail
 from apps.notifications.services import notify_user_registration
 import logging
 from django.db import transaction
+from django.urls import reverse  # Import reverse to use URL resolution
+
 
 logger = logging.getLogger(__name__)
 
 User = get_user_model()  # Using Custom User Model
 
-# Registration View with Success Page Redirect
 def signup_view(request):
+    next_url = request.GET.get("next") or request.POST.get("next") or reverse("home")
+
     if request.method == "POST":
         form = CustomSignupForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             transaction.on_commit(lambda: notify_user_registration(user)) 
-            messages.success(request, "Registration successful! Redirecting you to login...")
-            return redirect("registration_success")  # Redirect to success page
+            messages.success(request, "Registration successful! Redirecting you...")
+            return redirect(next_url)  # Redirect to intended page after signup
+
     else:
         form = CustomSignupForm()
-    
-    return render(request, "registration/signup.html", {"form": form})
 
+    return render(request, "registration/signup.html", {"form": form, "next": next_url})
 
-
-# Login View
+#Login View
 def login_view(request):
-
- # Force clear messages before rendering the login page
-    request.session.pop('_messages', None)   
+    request.session.pop('_messages', None)  
+    next_url = request.GET.get("next") or request.POST.get("next") or reverse("home")
 
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
@@ -44,12 +45,13 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, "You are now logged in!")
-            return redirect("home")  # Redirect to homepage after login
+            return redirect(next_url)  # Redirect to intended page after login
         else:
             messages.error(request, "Invalid username or password. Please try again.")
     else:
         form = AuthenticationForm()
-    return render(request, "registration/login.html", {"form": form})
+    
+    return render(request, "registration/login.html", {"form": form, "next": next_url})
 
 
 #Logout View

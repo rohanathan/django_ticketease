@@ -3,203 +3,41 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="row">
-        <!-- Movie Poster -->
-        <div class="col-md-4">
-            <img src="{{ movie.poster.url }}" class="img-fluid" alt="{{ movie.title }}">
-        </div>
-
-        <!-- Movie Details & Selection -->
-        <div class="col-md-8">
-            <h2>{{ movie.title }}</h2>
-            <p>{{ movie.description }}</p>
-            <p><strong>Genre:</strong> {{ movie.genre }}</p>
-            <p><strong>Rating:</strong> {{ movie.get_rating_display }}</p>
-            <p><strong>Runtime:</strong> {{ movie.runtime }} mins</p>
-
-            <hr>
-
-            <!-- Select Date -->
-            <div class="mb-3">
-                <label for="datePicker" class="fw-bold">📅 Select Date:</label>
-                <input type="date" id="datePicker" class="form-control" min="{{ today|date:'Y-m-d' }}">
+    <div id="movieDetailContainer" data-movie-id="{{ movie.id }}">
+        <div class="row">
+            <!-- 🎬 Movie Poster -->
+            <div class="col-md-4">
+                <img src="{{ movie.poster.url }}" class="img-fluid rounded shadow" alt="{{ movie.title }}">
             </div>
 
-            <!-- Select Venue -->
-            <div class="mb-3">
-                <label for="venuePicker" class="fw-bold">🏛 Select Venue:</label>
-                <select id="venuePicker" class="form-select">
-                    <option value="" selected disabled>Choose a venue</option>
-                    {% for venue in venues %}
-                        <option value="{{ venue.id }}">{{ venue.name }}</option>
+            <!-- 🎟 Movie Details -->
+            <div class="col-md-8">
+                <h2 class="fw-bold">{{ movie.title }}</h2>
+                <p>{{ movie.description }}</p>
+                <p><strong>Genre:</strong> {{ movie.genre }}</p>
+                <p><strong>Rating:</strong> {{ movie.get_rating_display }}</p>
+                <p><strong>Runtime:</strong> {{ movie.runtime }} mins</p>
+                <hr>
+
+                <!-- 📅 Select Date -->
+                <h4 class="fw-bold">📅 Select Date</h4>
+                <div class="d-flex gap-2 mb-4">
+                    {% for date in date_range %}
+                        <button class="btn btn-outline-primary date-btn" data-date="{{ date|date:'Y-m-d' }}">
+                            {{ date|date:"D, M j" }}
+                        </button>
                     {% endfor %}
-                </select>
+                </div>
+
+                <!-- 🎦 Showtimes & Venues (Loaded Dynamically) -->
+                <div id="showtimeContainer">
+                    <p>Select a date to see showtimes.</p>
+                </div>
             </div>
-
-            <!-- Select Showtime -->
-            <div class="mb-3">
-                <label for="showtimePicker" class="fw-bold">🎬 Select Showtime:</label>
-                <select id="showtimePicker" class="form-select" disabled>
-                    <option value="" selected disabled>Select a date & venue first</option>
-                </select>
-            </div>
-
-            <!-- Select Ticket Class -->
-            <div class="mb-3">
-                <label for="ticketClassPicker" class="fw-bold">🎟️ Select Ticket Class:</label>
-                <select id="ticketClassPicker" class="form-select">
-                    <option value="15" selected>Gold (£15)</option>
-                    <option value="20">Platinum (£20)</option>
-                </select>
-            </div>
-
-            <!-- Select Number of Tickets -->
-            <div class="mb-3">
-                <label for="ticketQuantity" class="fw-bold">🔢 Select Number of Tickets:</label>
-                <select id="ticketQuantity" class="form-select" disabled>
-                    <option value="" selected disabled>Choose tickets</option>
-                    <option value="1">1 Ticket</option>
-                    <option value="2">2 Tickets</option>
-                    <option value="3">3 Tickets</option>
-                    <option value="4">4 Tickets</option>
-                    <option value="5">5 Tickets</option>
-                </select>
-            </div>
-
-            <!-- Display Total Price -->
-            <h4 class="mt-3">Total Price: £<span id="totalPrice">0.00</span></h4>
-
-            <!-- Confirm Booking Button -->
-            <form id="bookingForm" action="" method="GET">
-                <input type="hidden" id="totalPriceInput" name="total_price">
-                <button type="submit" class="btn btn-primary">Confirm Booking</button>
-            </form>
         </div>
     </div>
 </div>
 
-<!-- JavaScript for Dynamic Selection -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const movieId = "{{ movie.id }}";
-    
-        // Select elements
-        const datePicker = document.getElementById("datePicker");
-        const venuePicker = document.getElementById("venuePicker");
-        const showtimePicker = document.getElementById("showtimePicker");
-        const ticketClassPicker = document.getElementById("ticketClassPicker");
-        const ticketQuantity = document.getElementById("ticketQuantity");
-        const totalPriceElement = document.getElementById("totalPrice");
-        const confirmBookingBtn = document.getElementById("confirmBookingBtn");
-        const bookingForm = document.getElementById("bookingForm");
-    
-        // Default selections
-        let selectedDate = "";
-        let selectedVenue = "";
-        let selectedShowtime = "";
-        let selectedClass = 15; // Default Gold price
-        let selectedQuantity = 0;
-    
-        /** 📌 Updates Showtime Options Based on Selected Date & Venue */
-        function updateShowtimes() {
-            if (!selectedDate || !selectedVenue) {
-                disableShowtimeSelection("Select a date & venue first");
-                return;
-            }
-    
-            fetch(`/movies/api/showtimes/?movie_id=${movieId}&date=${selectedDate}&venue_id=${selectedVenue}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.length === 0) {
-                        disableShowtimeSelection("No showtimes available");
-                        return;
-                    }
-    
-                    populateShowtimeOptions(data);
-                })
-                .catch(error => console.error("Error fetching showtimes:", error));
-        }
-    
-        /** 📌 Populates Showtime Dropdown */
-        function populateShowtimeOptions(showtimes) {
-            showtimePicker.innerHTML = showtimes.map(showtime =>
-                `<option value="${showtime.id}">${showtime.time}</option>`
-            ).join("");
-    
-            showtimePicker.disabled = false;
-        }
-    
-        /** 📌 Disables Showtime Selection with a Message */
-        function disableShowtimeSelection(message) {
-            showtimePicker.innerHTML = `<option value="" selected disabled>${message}</option>`;
-            showtimePicker.disabled = true;
-            ticketQuantity.disabled = true;
-            confirmBookingBtn.disabled = true;
-        }
-    
-        /** 📌 Updates Total Price */
-        function updateTotalPrice() {
-            let totalPrice = selectedQuantity > 0 ? (selectedQuantity * selectedClass).toFixed(2) : "0.00";
-            totalPriceElement.innerText = totalPrice;
-            document.getElementById("totalPriceInput").value = totalPrice;
-            confirmBookingBtn.disabled = selectedQuantity === 0;
-        }
-    
-        /** 📌 Updates Form Action for Booking Submission */
-        function updateFormAction() {
-            if (selectedShowtime) {
-                bookingForm.action = `/movies/${movieId}/showtime/${selectedShowtime}/payment/`;
-            } else {
-                bookingForm.action = "";
-            }
-        }
-    
-        /** 📌 Handles Date Selection */
-        datePicker.addEventListener("change", function () {
-            selectedDate = this.value;
-            updateShowtimes();
-        });
-    
-        /** 📌 Handles Venue Selection */
-        venuePicker.addEventListener("change", function () {
-            selectedVenue = this.value;
-            updateShowtimes();
-        });
-    
-        /** 📌 Enables Ticket Quantity Selection on Showtime Selection */
-        showtimePicker.addEventListener("change", function () {
-            selectedShowtime = this.value;
-            ticketQuantity.disabled = false;
-            updateFormAction();
-        });
-    
-        /** 📌 Updates Price When Ticket Class Changes */
-        ticketClassPicker.addEventListener("change", function () {
-            selectedClass = parseFloat(this.value);
-            updateTotalPrice();
-        });
-    
-        /** 📌 Updates Total Price on Ticket Quantity Change */
-        ticketQuantity.addEventListener("change", function () {
-            selectedQuantity = parseInt(this.value);
-            updateTotalPrice();
-        });
-    
-        /** 📌 Redirects to Payment Page */
-        confirmBookingBtn.addEventListener("click", function () {
-            if (!selectedShowtime || selectedQuantity === 0) return;
-            window.location.href = `/movies/${movieId}/showtime/${selectedShowtime}/payment/?tickets=${selectedQuantity}&price=${selectedClass}`;
-        });
-    
-        /** 📌 Ensures Form Submits Correct Total Price */
-        bookingForm.addEventListener("submit", function () {
-            document.getElementById("totalPriceInput").value = totalPriceElement.innerText;
-        });
-    
-        // Initialize Form Action on Load
-        updateFormAction();
-    });
-    </script>
-    
-
+<!-- ✅ Load External JS -->
+<script src="{% static 'movies/js/movie_detail.js' %}"></script>
 {% endblock %}

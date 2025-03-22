@@ -3,13 +3,13 @@
 <div class="container mt-5">
     <h2 class="fw-bold text-center">My Bookings</h2>
     {% if bookings %}
-        <table class="table">
+        <table class="table table-striped mt-4">
             <thead>
                 <tr>
                     <th>Category</th>
                     <th>Title</th>
                     <th>Date/Time</th>
-                    <th>Tickets</th>
+                    <th>Tickets/Seats</th>
                     <th>Total Price</th>
                     <th>Actions</th>
                 </tr>
@@ -42,7 +42,7 @@
                     <td>{{ booking.seat_count }}</td>
                     <td>£{{ booking.total_price }}</td>
                     <td>
-                        {% if booking.category == "movie" %}
+                        {% if booking.category == "movie" and booking.movie and booking.showtime %}
                             <a href="{% url 'booking_success' movie_id=booking.movie.id showtime_id=booking.showtime.id %}" class="btn btn-sm btn-primary">View</a>
                         {% elif booking.category == "event" and booking.event %}
                             <a href="{% url 'booking_success_event' event_id=booking.event.id %}" class="btn btn-sm btn-primary">View</a>
@@ -55,7 +55,7 @@
             </tbody>
         </table>
     {% else %}
-        <p>You have no bookings yet.</p>
+        <p class="text-center mt-4">You have no bookings yet.</p>
     {% endif %}
 </div>
 {% endblock %}

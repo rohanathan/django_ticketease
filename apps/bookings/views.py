@@ -96,7 +96,9 @@ def booking_success_event(request, event_id):
 
 @login_required
 def my_bookings(request):
+    """
+    Retrieves all bookings for the logged-in user,
+    both movies and events.
+    """
     bookings = Booking.objects.filter(user=request.user).order_by("-created_at")
-    return render(request, "bookings/my_bookings.html", {
-        "bookings": bookings,
-    })
+    return render(request, "bookings/my_bookings.html", {"bookings": bookings})

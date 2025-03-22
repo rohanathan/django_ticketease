@@ -143,11 +143,10 @@ def payment_success(request):
         price_per_ticket = float(metadata.get("price_per_ticket", 0))
         total_price = ticket_count * price_per_ticket
 
-        # Fetch movie & showtime details
         movie = get_object_or_404(Movie, id=movie_id) if movie_id else None
         showtime = get_object_or_404(Showtime, id=showtime_id) if showtime_id else None
 
-        # Retrieve the latest booking for this user (if any)
+        # Retrieve the latest booking if it exists; otherwise create a new booking.
         booking = Booking.objects.filter(
             user=request.user,
             movie=movie,
@@ -166,11 +165,11 @@ def payment_success(request):
             )
 
         qr_data = f"""
-        Booking Confirmation:
-        🎬 Movie: {movie.title if movie else 'N/A'}
-        🕒 Showtime: {showtime.datetime if showtime else 'N/A'}
-        🎟️ Tickets: {ticket_count}
-        💰 Total Price: {total_price} GBP
+Booking Confirmation:
+🎬 Movie: {movie.title if movie else 'N/A'}
+🕒 Showtime: {showtime.datetime if showtime else 'N/A'}
+🎟️ Tickets: {ticket_count}
+💰 Total Price: {total_price} GBP
         """
     elif category == "event":
         # --- Event Booking Logic ---
@@ -181,7 +180,7 @@ def payment_success(request):
         total_price = ticket_count * price_per_ticket
 
         event = get_object_or_404(Event, id=event_id) if event_id else None
-        # Retrieve the latest booking for this user in the event category
+
         booking = Booking.objects.filter(
             user=request.user,
             category="event"
@@ -189,19 +188,20 @@ def payment_success(request):
         if not booking:
             booking = Booking.objects.create(
                 user=request.user,
-                event=event,            # store the event
-                seat_count=ticket_count,
+                event=event,  # store the event
+                seat_count=ticket_count,  # for events, represents ticket count
                 total_price=total_price,
                 category="event",
             )
+
         qr_data = f"""
-        Booking Confirmation:
-        🎟️ Event: {event.title if event else 'N/A'}
-        📅 Date: {event.date if event else 'N/A'}
-        📍 Location: {event.location if event else 'N/A'}
-        💼 Ticket Type: {ticket_type}
-        🎫 Tickets: {ticket_count}
-        💰 Total Price: {total_price} GBP
+Booking Confirmation:
+🎟️ Event: {event.title if event else 'N/A'}
+📅 Date: {event.date if event else 'N/A'}
+📍 Location: {event.location if event else 'N/A'}
+💼 Ticket Type: {ticket_type}
+🎫 Tickets: {ticket_count}
+💰 Total Price: {total_price} GBP
         """
     else:
         logger.error("❌ Unknown booking category in session metadata")
@@ -228,23 +228,23 @@ def payment_success(request):
     # Send confirmation email with QR Code attached
     subject = "🎟️ Your TicketEase Booking Confirmation"
     message = f"""
-    Hi {request.user.username},
+Hi {request.user.username},
 
-    Your payment of {total_price} GBP was successful! 🎉
+Your payment of {total_price} GBP was successful! 🎉
 
-    {"Movie: " + movie.title if category == "movie" and movie else "Event: " + event.title if category == "event" and event else ""}
-    {"Showtime: " + str(showtime.datetime) if category == "movie" and showtime else ""}
-    {"Date: " + str(event.date) if category == "event" and event else ""}
-    {"Location: " + event.location if category == "event" and event else ""}
-    Tickets: {ticket_count}
-    Total Price: {total_price} GBP
+{"Movie: " + movie.title if category == "movie" and movie else "Event: " + event.title if category == "event" and event else ""}
+{"Showtime: " + str(showtime.datetime) if category == "movie" and showtime else ""}
+{"Date: " + str(event.date) if category == "event" and event else ""}
+{"Location: " + event.location if category == "event" and event else ""}
+Tickets: {ticket_count}
+Total Price: {total_price} GBP
 
-    Your QR Code is attached. Please show it at the entrance.
+Your QR Code is attached. Please show it at the entrance.
 
-    Thank you for choosing TicketEase!
-    
-    Best,
-    TicketEase Team
+Thank you for choosing TicketEase!
+
+Best,
+TicketEase Team
     """
     email = EmailMessage(
         subject,
@@ -265,7 +265,6 @@ def payment_success(request):
         return redirect(reverse("booking_success", kwargs={"movie_id": movie_id, "showtime_id": showtime_id}))
     else:  # event
         return redirect(reverse("booking_success_event", kwargs={"event_id": event_id}))
-
 
 @login_required
 def payment_cancel(request):

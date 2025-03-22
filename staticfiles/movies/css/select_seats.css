@@ -1,35 +1,34 @@
-/* Screen Header */
+/* 🎬 Screen Representation */
 .screen-box {
-    width: 80%;
-    margin: auto;
-    padding: 10px;
-    background-color: #333;
+    background-color: black;
     color: white;
-    text-align: center;
-    font-weight: bold;
-    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 20px;
 }
 
-/* Seat Grid */
+
+
 .seat-grid {
-    display: flex;  /* Use flexbox to align seats properly */
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px; /* Space between rows */
 }
 
-/* Individual Seat Styling */
+.seat-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Space between seats */
+}
+
 .seat-btn {
     width: 40px;
     height: 40px;
-    border: 1px solid #444;
-    background-color: #ccc;
-    cursor: pointer;
+    border: 1px solid #aaa;
     border-radius: 5px;
-    text-align: center;
-    display: inline-block; /* Ensure visibility */
-    margin: 5px; /* Space between seats */
+    background-color: #eee;
+    cursor: pointer;
+    font-weight: bold;
 }
 
 .seat-btn.selected {
@@ -38,6 +37,30 @@
 }
 
 .seat-btn.unavailable {
-    background-color: gray;
+    background-color: #ccc;
     cursor: not-allowed;
+}
+
+
+.seat-btn.diamond { background-color: #FFD700; }  /* Gold */
+.seat-btn.gold { background-color: #FFA500; }  /* Orange */
+.seat-btn.selected { background-color: green; color: white; }
+.seat-btn.booked { background-color: red; color: white; cursor: not-allowed; }
+
+/* 🎟 Seat Legend */
+.seat-legend {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+    border: 1px solid black;
+}
+
+.seat-legend.gold { background-color: #FFA500; }
+.seat-legend.diamond { background-color: #FFD700; }
+.seat-legend.selected { background-color: green; }
+.seat-legend.booked { background-color: red; }
+
+.seat-row {
+    margin-bottom: 10px;
 }

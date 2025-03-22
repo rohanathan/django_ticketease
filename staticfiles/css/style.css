@@ -1,0 +1,143 @@
+/* Centering the signup form */
+.signup-container {
+    width: 400px;
+    margin: 50px auto; /* Center it */
+    padding: 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* Input fields styling */
+.signup-container input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Blue button styling */
+.signup-container .btn {
+    width: 100%;
+    background-color: #007bff; /* Blue color */
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.signup-container .btn:hover {
+    background-color: #0056b3; /* Darker blue */
+}
+
+/* Signup link */
+.signup-link {
+    color: #007bff;
+    font-weight: bold;
+}
+
+.hero {
+    background: url("/static/images/hero.jpg") no-repeat center center;
+    background-size: cover;
+    position: relative;
+  }
+  /* optional overlay to darken the background for better text contrast */
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); 
+  }
+  .hero-content {
+    position: relative; /* so it appears above the overlay */
+    z-index: 1;
+  }
+  /* Default (Light Mode) */
+body.light-mode .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+/* Default Light Mode */
+body.light-mode {
+    background-color: white;
+    color: black;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background-color: #121212;  /* Darker background */
+    color: white;
+}
+
+/* Ensure cards and containers also switch */
+.card {
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.dark-mode .card {
+    background-color: #1e1e1e;
+    color: white;
+}
+
+.dark-mode .navbar {
+    background-color: #212529 !important;
+}
+
+.dark-mode .footer {
+    background-color: #1e1e1e;
+    color: white;
+}
+
+/* Buttons */
+.dark-mode .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.dark-mode .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}/* Default Light Mode */
+body.light-mode {
+    background-color: #ffffff;
+    color: #000;
+}
+body.light-mode .dashboard-card {
+    background-color: #f8f9fa;
+    color: black;
+}
+body.light-mode .dashboard-title {
+    background-color: black;
+    color: white;
+}
+body.light-mode .dashboard-details {
+    background-color: white;
+    color: black;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+body.dark-mode .dashboard-card {
+    background-color: #1e1e1e;
+    color: white;
+}
+body.dark-mode .dashboard-title {
+    background-color: #333;
+    color: white;
+}
+body.dark-mode .dashboard-details {
+    background-color: #222;
+    color: white;
+}
+/* Ensure price text is visible in dark mode */
+body.dark-mode .text-muted {
+    color: white !important;
+}

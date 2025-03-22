@@ -19,7 +19,6 @@ class Command(BaseCommand):
                 "rating": "PG-13",
                 "release_date": "2010-07-16",
                 "poster": "movie_posters/inception_poster.jpg",
-                "trailer_url": "https://www.youtube.com/watch?v=LifqWf0BAOA&ab_channel=WarnerBros.UK%26Ireland",
             },
             {
                 "title": "Interstellar",
@@ -29,7 +28,6 @@ class Command(BaseCommand):
                 "rating": "PG-13",
                 "release_date": "2014-11-07",
                 "poster": "movie_posters/interstellar_poster.jpg",
-                "trailer_url": "https://www.youtube.com/watch?v=zSWdZVtXT7E&ab_channel=WarnerBros.UK%26Ireland",
             },
             {
                 "title": "The Godfather",
@@ -39,7 +37,6 @@ class Command(BaseCommand):
                 "rating": "R",
                 "release_date": "1972-03-24",
                 "poster": "movie_posters/godfather_poster.jpg",
-                "trailer_url": "https://www.youtube.com/watch?v=UaVTIH8mujA&ab_channel=ParamountPictures",
             },
             {
                 "title": "Captain America: Brave New World",
@@ -49,7 +46,6 @@ class Command(BaseCommand):
                 "rating": "PG-13",
                 "release_date": "2025-07-26",
                 "poster": "movie_posters/captain_america_brave_new_world_poster.jpg",
-                "trailer_url": "https://www.youtube.com/watch?v=1pHDWnXmK7Y&ab_channel=MarvelEntertainment",
             },
             {
                 "title": "Snow White",
@@ -59,7 +55,6 @@ class Command(BaseCommand):
                 "rating": "PG",
                 "release_date": "2025-03-21",
                 "poster": "movie_posters/snow_white_2025_poster.jpg",
-                "trailer_url": "https://www.youtube.com/watch?v=iV46TJKL8cU&ab_channel=Disney",
             },
             {
                 "title": "Dog Man",
@@ -69,7 +64,6 @@ class Command(BaseCommand):
                 "rating": "PG",
                 "release_date": "2025-02-07",
                 "poster": "movie_posters/dog_man_poster.jpg",
-                "trailer_url": "https://www.youtube.com/watch?v=QaJbAennB_Q&ab_channel=UniversalPictures",
             },
             {
                 "title": "Bridget Jones: Mad About The Boy",
@@ -79,7 +73,6 @@ class Command(BaseCommand):
                 "rating": "15",
                 "release_date": "2025-02-13",
                 "poster": "movie_posters/bridget_jones_poster.jpg",
-                "trailer_url": "https://www.youtube.com/watch?v=AZr9lYz12jw&ab_channel=UniversalPictures",
             },
             {
                 "title": "Mickey 17",
@@ -89,7 +82,6 @@ class Command(BaseCommand):
                 "rating": "15",
                 "release_date": "2025-03-07",
                 "poster": "movie_posters/mickey_17_poster.jpg",
-                "trailer_url": "https://www.youtube.com/watch?v=osYpGSz_0i4&ab_channel=WarnerBros.",
             },
             {
                 "title": "Hans Zimmer & Friends: Diamond In The Desert",
@@ -99,7 +91,6 @@ class Command(BaseCommand):
                 "rating": "12A",
                 "release_date": "2025-03-19",
                 "poster": "movie_posters/hans_zimmer_poster.jpg",
-                "trailer_url": "https://www.youtube.com/embed/ZMO2zV14NCI",
             },
             {
                 "title": "September 5",
@@ -109,7 +100,6 @@ class Command(BaseCommand):
                 "rating": "15",
                 "release_date": "2025-02-05",
                 "poster": "movie_posters/september_5_poster.jpg",
-                "trailer_url": "https://www.youtube.com/embed/Azud40CQ3IE",
             },
         ]
 
@@ -125,7 +115,7 @@ class Command(BaseCommand):
             else:
                 self.stdout.write(f"Movie already exists: {movie.title}")
 
-        # --- Step 1: Populate Venues ---
+        # --- Populate Venues and Screens ---
         venues_data = [
             {"name": "IMAX Glasgow", "location": "Glasgow Science Centre", "capacity": 300},
             {"name": "Cineworld Glasgow", "location": "Renfrew Street, Glasgow", "capacity": 450},
@@ -138,6 +128,42 @@ class Command(BaseCommand):
             venue, created = Venue.objects.get_or_create(**venue_data)
             venues[venue.name] = venue
             if created:
-                self.stdout.write(self.style.SUCCESS(f"🏢 Created venue: {venue.name}"))
+                self.stdout.write(self.style.SUCCESS(f"Created venue: {venue.name}"))
             else:
                 self.stdout.write(f"Venue already exists: {venue.name}")
+
+            # Create 3 screens per venue
+            for screen_number in range(1, 4):
+                screen, created = Screen.objects.get_or_create(venue=venue, screen_number=screen_number)
+                if created:
+                    self.stdout.write(self.style.SUCCESS(f"🎥 Created Screen {screen_number} for {venue.name}"))
+                else:
+                    self.stdout.write(f"Screen {screen_number} already exists for {venue.name}")
+
+        # --- Populate Showtimes for All Movies ---
+        # Define the showtime range (for April and May of the current year)
+        current_year = timezone.now().year
+        start_date = datetime(current_year, 4, 1)
+        end_date = datetime(current_year, 5, 31)
+        showtimes_per_day = ["12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"]
+
+        all_screens = Screen.objects.all()
+        if not movies or not all_screens:
+            self.stdout.write(self.style.ERROR("⚠️ No movies or screens found!"))
+            return
+
+        for movie in Movie.objects.all():
+            for screen in all_screens:
+                current_date = start_date
+                while current_date <= end_date:
+                    for showtime_str in showtimes_per_day:
+                        dt_str = f"{current_date.date()} {showtime_str}"
+                        try:
+                            showtime_dt = timezone.make_aware(datetime.strptime(dt_str, "%Y-%m-%d %I:%M %p"))
+                        except Exception as e:
+                            self.stdout.write(self.style.ERROR(f"Error parsing date: {dt_str} - {e}"))
+                            continue
+                        Showtime.objects.get_or_create(movie=movie, screen=screen, datetime=showtime_dt)
+                    current_date += timedelta(days=1)
+
+        self.stdout.write(self.style.SUCCESS("🎬 Showtimes populated successfully for all movies!"))

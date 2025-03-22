@@ -18,7 +18,6 @@ class Movie(models.Model):
     rating = models.CharField(max_length=5, choices=MOVIE_RATINGS, default="G")
     release_date = models.DateField(null=True, blank=True)
     poster = models.ImageField(upload_to='movie_posters/', null=True, blank=True)
-    trailer_url = models.URLField(null=True, blank=True)  # 🎥 New field for YouTube trailer
 
     def __str__(self):
         return self.title

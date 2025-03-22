@@ -8,4 +8,5 @@ urlpatterns = [
     path('<int:event_id>/book/', book_event, name='book_event'),
     path('<int:event_id>/create-checkout-session/', create_checkout_session, name='create_checkout_session'),
     path('api/events/<int:event_id>/', event_detail_api, name='event-detail-api'),
+    
 ]

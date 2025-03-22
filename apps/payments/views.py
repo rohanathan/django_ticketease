@@ -4,19 +4,31 @@ import qrcode
 import io
 import base64
 from django.conf import settings
-from django.core.mail import EmailMessage
+from django.core.mail import send_mail, EmailMessage
 from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from apps.movies.models import Movie, Showtime
 from apps.events.models import Event
-from apps.bookings.models import Booking  # Import Booking Model
-from .models import Payment  # Import Payment Model
+from .models import Payment  # Payment model
+from apps.bookings.models import Booking
 
 logger = logging.getLogger(__name__)  # Logger for debugging
 
 @login_required
 def create_checkout_session(request, *args, **kwargs):
+    """
+    Handles payment for both movies and events.
+    
+    URL patterns should supply:
+      - For movies: movie_id and showtime_id in kwargs.
+      - For events: event_id in kwargs.
+    
+    GET parameters include:
+      - tickets: number of tickets (default 1)
+      - price: price per ticket
+      - (optionally for events) ticket_type (default "General")
+    """
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
     # Extract IDs from URL kwargs
@@ -25,15 +37,15 @@ def create_checkout_session(request, *args, **kwargs):
     event_id = kwargs.get("event_id")
 
     # Parse GET parameters
-    ticket_count = int(request.GET.get("tickets", 1))
-    
     try:
-        price_per_ticket = float(request.GET.get("price", 0))
+        ticket_count = int(request.GET.get("tickets", 1))
     except (ValueError, TypeError):
-        price_per_ticket = 0
+        ticket_count = 1
 
-    # Log received price to debug
-    logger.info(f"🔍 Received price from request: {request.GET.get('price')} (Parsed: {price_per_ticket})")
+    try:
+        price_per_ticket = float(request.GET.get("price", 0))  # Fetch from request
+    except (ValueError, TypeError):
+        price_per_ticket = 0  # Default if not found
 
     line_items = []
     metadata = {"user_id": str(request.user.id)}
@@ -43,13 +55,9 @@ def create_checkout_session(request, *args, **kwargs):
         movie = get_object_or_404(Movie, id=movie_id)
         showtime = get_object_or_404(Showtime, id=showtime_id)
 
-        # Force fetch actual price from DB if frontend sends 0 or missing price
+        # If price not set, fetch from database (assuming dynamic pricing exists)
         if price_per_ticket <= 0:
-            price_per_ticket = getattr(movie, "price", 20)  # Fetch movie price or fallback to 20
-            logger.warning(f"⚠️ Using default movie price: {price_per_ticket}")
-
-        # Log final price before creating the session
-        logger.info(f"Final Price Per Ticket: {price_per_ticket}")
+            price_per_ticket = movie.price if hasattr(movie, "price") else 200  # Default fallback
 
         line_items.append({
             "price_data": {
@@ -75,10 +83,6 @@ def create_checkout_session(request, *args, **kwargs):
         event = get_object_or_404(Event, id=event_id)
         ticket_type = request.GET.get("ticket_type", "General")
 
-        if price_per_ticket <= 0:
-            logger.warning(f"No price found for event {event.title}, using 20 GBP default")
-            price_per_ticket = 20
-
         line_items.append({
             "price_data": {
                 "currency": "gbp",
@@ -102,9 +106,6 @@ def create_checkout_session(request, *args, **kwargs):
         # If neither movie nor event IDs were provided, cancel payment
         return redirect(reverse("payment_cancel"))
 
-    # Log final session details before sending to Stripe
-    logger.info(f"🎟️ Creating Stripe session: Tickets: {ticket_count}, Total: {price_per_ticket * ticket_count}")
-
     # Create the Stripe Checkout Session
     checkout_session = stripe.checkout.Session.create(
         payment_method_types=["card"],
@@ -112,7 +113,7 @@ def create_checkout_session(request, *args, **kwargs):
         mode="payment",
         success_url=request.build_absolute_uri(reverse("payment_success")) + "?session_id={CHECKOUT_SESSION_ID}",
         cancel_url=request.build_absolute_uri(reverse("payment_cancel")),
-        metadata=metadata,
+        metadata=metadata,  # Pass metadata for later retrieval
     )
 
     return redirect(checkout_session.url)
@@ -130,66 +131,121 @@ def payment_success(request):
 
     session = stripe.checkout.Session.retrieve(session_id)
     
-    # Retrieve metadata
+    # Retrieve metadata from the Stripe session.
     metadata = session.metadata or {}
-    movie_id = metadata.get("movie_id")
-    showtime_id = metadata.get("showtime_id")
-    event_id = metadata.get("event_id")
-    ticket_count = int(metadata.get("ticket_count", 1))
-    price_per_ticket = float(metadata.get("price_per_ticket", 0))  
-    total_price = ticket_count * price_per_ticket
+    category = metadata.get("category", "movie")  # default to "movie" if not provided
 
-    movie = get_object_or_404(Movie, id=movie_id) if movie_id else None
-    showtime = get_object_or_404(Showtime, id=showtime_id) if showtime_id else None
-    event = get_object_or_404(Event, id=event_id) if event_id else None
+    if category == "movie":
+        # --- Movie Booking Logic ---
+        movie_id = metadata.get("movie_id")
+        showtime_id = metadata.get("showtime_id")
+        ticket_count = int(metadata.get("ticket_count", 1))
+        price_per_ticket = float(metadata.get("price_per_ticket", 0))
+        total_price = ticket_count * price_per_ticket
 
-    # Create Booking
-    booking, created = Booking.objects.get_or_create(
-        user=request.user,
-        movie=movie if movie else None,
-        showtime=showtime if showtime else None,
-        event=event if event else None,
+        # Fetch movie & showtime details
+        movie = get_object_or_404(Movie, id=movie_id) if movie_id else None
+        showtime = get_object_or_404(Showtime, id=showtime_id) if showtime_id else None
+
+        # Retrieve the latest booking for this user (if any)
+        booking = Booking.objects.filter(
+            user=request.user,
+            movie=movie,
+            showtime=showtime,
+            category="movie"
+        ).order_by("-created_at").first()
+
+        if not booking:
+            booking = Booking.objects.create(
+                user=request.user,
+                movie=movie,
+                showtime=showtime,
+                seat_count=ticket_count,
+                total_price=total_price,
+                category="movie",
+            )
+
+        qr_data = f"""
+        Booking Confirmation:
+        🎬 Movie: {movie.title if movie else 'N/A'}
+        🕒 Showtime: {showtime.datetime if showtime else 'N/A'}
+        🎟️ Tickets: {ticket_count}
+        💰 Total Price: {total_price} GBP
+        """
+    elif category == "event":
+        # --- Event Booking Logic ---
+        event_id = metadata.get("event_id")
+        ticket_type = metadata.get("ticket_type", "General")
+        ticket_count = int(metadata.get("ticket_count", 1))
+        price_per_ticket = float(metadata.get("price_per_ticket", 0))
+        total_price = ticket_count * price_per_ticket
+
+        event = get_object_or_404(Event, id=event_id) if event_id else None
+        # Retrieve the latest booking for this user in the event category
+        booking = Booking.objects.filter(
+            user=request.user,
+            category="event"
+        ).order_by("-created_at").first()
+        if not booking:
+            booking = Booking.objects.create(
+                user=request.user,
+                event=event,            # store the event
+                seat_count=ticket_count,
+                total_price=total_price,
+                category="event",
+            )
+        qr_data = f"""
+        Booking Confirmation:
+        🎟️ Event: {event.title if event else 'N/A'}
+        📅 Date: {event.date if event else 'N/A'}
+        📍 Location: {event.location if event else 'N/A'}
+        💼 Ticket Type: {ticket_type}
+        🎫 Tickets: {ticket_count}
+        💰 Total Price: {total_price} GBP
+        """
+    else:
+        logger.error("❌ Unknown booking category in session metadata")
+        return redirect(reverse("payment_cancel"))
+
+    # Save Payment record
+    payment, created = Payment.objects.get_or_create(
+        transaction_id=session.id,
         defaults={
-            "seat_count": ticket_count,
-            "total_price": total_price,
-            "category": "event" if event else "movie",
-        },
+            "user": request.user,
+            "stripe_checkout_id": session.id,
+            "amount": session.amount_total / 100,
+            "currency": session.currency.upper(),
+            "status": "success" if session.payment_status == "paid" else "failed",
+        }
     )
 
     # Generate QR Code
-    qr_data = f"""
-    Booking Confirmation:
-    🎬 Movie: {movie.title if movie else 'N/A'}
-    🎟️ Event: {event.title if event else 'N/A'}
-    🕒 Showtime: {showtime.datetime if showtime else 'N/A'}
-    🎟️ Seats: {ticket_count}
-    💰 Total Price: {total_price}
-    """
     qr = qrcode.make(qr_data)
     buffer = io.BytesIO()
     qr.save(buffer, format="PNG")
     qr_code_image = buffer.getvalue()
 
-    # Send Email with QR Code attachment
+    # Send confirmation email with QR Code attached
     subject = "🎟️ Your TicketEase Booking Confirmation"
     message = f"""
     Hi {request.user.username},
 
     Your payment of {total_price} GBP was successful! 🎉
 
-    🎬 {movie.title if movie else 'N/A'}
-    🕒 Showtime: {showtime.datetime if showtime else 'N/A'}
-    🎟️ Seats: {ticket_count}
-    💰 Total Price: {total_price} GBP
+    {"Movie: " + movie.title if category == "movie" and movie else "Event: " + event.title if category == "event" and event else ""}
+    {"Showtime: " + str(showtime.datetime) if category == "movie" and showtime else ""}
+    {"Date: " + str(event.date) if category == "event" and event else ""}
+    {"Location: " + event.location if category == "event" and event else ""}
+    Tickets: {ticket_count}
+    Total Price: {total_price} GBP
 
-    Your QR Code is attached to this email. Please show it at the entrance.
+    Your QR Code is attached. Please show it at the entrance.
 
     Thank you for choosing TicketEase!
     
     Best,
     TicketEase Team
     """
-
     email = EmailMessage(
         subject,
         message,
@@ -200,12 +256,15 @@ def payment_success(request):
 
     try:
         email.send(fail_silently=False)
-        logger.info(f"Booking confirmation email sent to {request.user.email}!")
+        logger.info(f"✅ Booking confirmation email sent to {request.user.email}!")
     except Exception as e:
         logger.error(f"❌ Error sending email: {e}")
 
-    # Redirect to success page
-    return redirect(reverse("booking_success", kwargs={"movie_id": movie_id, "showtime_id": showtime_id}) if movie else reverse("event_success", kwargs={"event_id": event_id}))
+    # Redirect based on category
+    if category == "movie":
+        return redirect(reverse("booking_success", kwargs={"movie_id": movie_id, "showtime_id": showtime_id}))
+    else:  # event
+        return redirect(reverse("booking_success_event", kwargs={"event_id": event_id}))
 
 
 @login_required

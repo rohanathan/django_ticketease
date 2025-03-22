@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="fw-bold text-center">My Bookings</h2>
+    {% if bookings %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Title</th>
+                    <th>Date/Time</th>
+                    <th>Tickets</th>
+                    <th>Total Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ booking.category }}</td>
+                    
+                    {% if booking.category == "movie" %}
+                        <td>{{ booking.movie.title }}</td>
+                        <td>{{ booking.showtime.datetime|date:"D, M j, Y - g:i A" }}</td>
+                    {% else %}
+                        <td>
+                          {% if booking.event %}
+                            {{ booking.event.title }}
+                          {% else %}
+                            Event Title
+                          {% endif %}
+                        </td>
+                        <td>
+                          {% if booking.event %}
+                            {{ booking.event.date }}
+                          {% else %}
+                            Event Date
+                          {% endif %}
+                        </td>
+                    {% endif %}
+                    
+                    <td>{{ booking.seat_count }}</td>
+                    <td>£{{ booking.total_price }}</td>
+                    <td>
+                        {% if booking.category == "movie" %}
+                            <a href="{% url 'booking_success' movie_id=booking.movie.id showtime_id=booking.showtime.id %}" class="btn btn-sm btn-primary">View</a>
+                        {% elif booking.category == "event" and booking.event %}
+                            <a href="{% url 'booking_success_event' event_id=booking.event.id %}" class="btn btn-sm btn-primary">View</a>
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You have no bookings yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

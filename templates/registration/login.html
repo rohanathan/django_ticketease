@@ -1,36 +1,117 @@
-{% extends 'base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - TicketEase</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            width: 350px;
+            padding: 20px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            font-size: 36px;
+            font-weight: bold;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            background-color: #007bff;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .signup, .forgot-password {
+            margin-top: 10px;
+        }
+        .forgot-password a, .signup a {
+            color: #007bff;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        .forgot-password a:hover, .signup a:hover {
+            text-decoration: underline;
+        }
+        /* Error message styling */
+        .alert {
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .alert-error {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TicketEase!</h1>
 
-{% block title %}Login - TicketEase{% endblock %}
+        <!-- section to display error messages -->
+        {% if messages %}
+           {% for message in messages %}
+               <div class="alert alert-error">{{ message }}</div>
+           {% endfor %}
+           {% if request.path == "/login/" %}
+               <script>
+                 // Clear messages after they are displayed once
+                setTimeout(() => {
+                   document.querySelectorAll('.alert').forEach(alert => alert.remove());
+                }, 3000); // Removes after 3 seconds
+               </script>
+            {% endif %}
+        {% endif %}
 
-{% block content %}
-<div class="login-container">
-    <h1 class="text-center">TicketEase!</h1>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-error">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
 
-    <form method="post" action="{% url 'login' %}?next={{ request.GET.next }}">
-        {% csrf_token %}
-        <input type="hidden" name="next" value="{{ request.GET.next }}">
+            <!-- Forgot Password Link -->
+            <div class="forgot-password">
+                <a href="{% url 'forgot_password' %}">Forgot Password?</a>
+            </div>
 
-        <div class="mb-3">
-            <input type="text" name="username" class="form-control" placeholder="Username" required>
+            <button type="submit" class="btn">Login</button>
+        </form>
+
+        <div class="signup">
+            Don't have an account? <a href="{% url 'signup' %}">Sign up</a>
         </div>
-        <div class="mb-3">
-            <input type="password" name="password" class="form-control" placeholder="Password" required>
-        </div>
-
-        <div class="mb-3 text-center">
-            <a href="{% url 'forgot_password' %}">Forgot Password?</a>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Login</button>
-    </form>
-
-    <p class="mt-3 text-center">Don't have an account? <a href="{% url 'signup' %}?next={{ request.GET.next }}">Sign up</a></p>
-</div>
-{% endblock %}
+    </div>
+</body>
+</html>

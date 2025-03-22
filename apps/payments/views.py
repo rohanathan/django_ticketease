@@ -172,7 +172,6 @@ Booking Confirmation:
 💰 Total Price: {total_price} GBP
         """
     elif category == "event":
-        # --- Event Booking Logic ---
         event_id = metadata.get("event_id")
         ticket_type = metadata.get("ticket_type", "General")
         ticket_count = int(metadata.get("ticket_count", 1))
@@ -181,18 +180,14 @@ Booking Confirmation:
 
         event = get_object_or_404(Event, id=event_id) if event_id else None
 
-        booking = Booking.objects.filter(
+        # ALWAYS create a new booking
+        booking = Booking.objects.create(
             user=request.user,
-            category="event"
-        ).order_by("-created_at").first()
-        if not booking:
-            booking = Booking.objects.create(
-                user=request.user,
-                event=event,  # store the event
-                seat_count=ticket_count,  # for events, represents ticket count
-                total_price=total_price,
-                category="event",
-            )
+            event=event,
+            seat_count=ticket_count,
+            total_price=total_price,
+            category="event",
+        )
 
         qr_data = f"""
 Booking Confirmation:

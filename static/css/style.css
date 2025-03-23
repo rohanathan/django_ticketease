@@ -112,7 +112,7 @@ body.light-mode .dashboard-card {
     color: black;
 }
 body.light-mode .dashboard-title {
-    background-color: black;
+    background-color: #007bff;
     color: white;
 }
 body.light-mode .dashboard-details {
@@ -130,7 +130,7 @@ body.dark-mode .dashboard-card {
     color: white;
 }
 body.dark-mode .dashboard-title {
-    background-color: #333;
+    background-color: #007bff;
     color: white;
 }
 body.dark-mode .dashboard-details {
@@ -141,3 +141,24 @@ body.dark-mode .dashboard-details {
 body.dark-mode .text-muted {
     color: white !important;
 }
+
+
+
+/* Fix modal for dark mode */
+body.dark-mode .modal-content {
+    background-color: #1e1e1e;
+    color: #f5f5f5;
+    border: 1px solid #444;
+  }
+  
+  body.dark-mode .modal-header,
+  body.dark-mode .modal-footer {
+    border-color: #333;
+  }
+  
+  body.dark-mode .btn-close {
+    filter: invert(1);
+  }
+  
+
+

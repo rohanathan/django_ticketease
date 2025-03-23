@@ -1,61 +1,91 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-5">
-    <h2 class="fw-bold text-center">My Bookings</h2>
-    {% if bookings %}
-        <table class="table table-striped mt-4">
-            <thead>
-                <tr>
-                    <th>Category</th>
-                    <th>Title</th>
-                    <th>Date/Time</th>
-                    <th>Tickets/Seats</th>
-                    <th>Total Price</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for booking in bookings %}
-                <tr>
-                    <td>{{ booking.category }}</td>
-                    
-                    {% if booking.category == "movie" %}
-                        <td>{{ booking.movie.title }}</td>
-                        <td>{{ booking.showtime.datetime|date:"D, M j, Y - g:i A" }}</td>
-                    {% else %}
-                        <td>
-                          {% if booking.event %}
-                            {{ booking.event.title }}
-                          {% else %}
-                            Event Title
-                          {% endif %}
-                        </td>
-                        <td>
-                          {% if booking.event %}
-                            {{ booking.event.date }}
-                          {% else %}
-                            Event Date
-                          {% endif %}
-                        </td>
-                    {% endif %}
-                    
-                    <td>{{ booking.seat_count }}</td>
-                    <td>£{{ booking.total_price }}</td>
-                    <td>
-                        {% if booking.category == "movie" and booking.movie and booking.showtime %}
-                            <a href="{% url 'booking_success' movie_id=booking.movie.id showtime_id=booking.showtime.id %}" class="btn btn-sm btn-primary">View</a>
-                        {% elif booking.category == "event" and booking.event %}
-                            <a href="{% url 'booking_success_event' event_id=booking.event.id %}" class="btn btn-sm btn-primary">View</a>
-                        {% else %}
-                            <span class="text-muted">N/A</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <h2 class="fw-bold text-center mb-4">My Bookings</h2>
+
+    <!-- Upcoming Bookings -->
+    <h4 class="mb-3">🎟️ Upcoming Bookings</h4>
+    {% if upcoming_bookings %}
+    <div class="row">
+        {% for booking in upcoming_bookings %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if booking.category == "movie" and booking.movie %}
+                <img src="{{ booking.movie.poster.url }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ booking.movie.title }}</h5>
+                    <p class="card-text">
+                        Showtime: {{ booking.showtime.datetime|date:"D, M j, Y - g:i A" }}<br>
+                        Tickets: {{ booking.seat_count }}<br>
+                        Price: £{{ booking.total_price }}
+                    </p>
+                    <a href="{% url 'booking_success' movie_id=booking.movie.id showtime_id=booking.showtime.id %}?from_dashboard=1" class="btn btn-primary mt-2">View</a>
+
+                </div>
+
+                {% elif booking.category == "event" and booking.event %}
+                <img src="{{ booking.event.image.url }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ booking.event.title }}</h5>
+                    <p class="card-text">
+                        Date: {{ booking.event.date|date:"D, M j, Y" }}<br>
+                        Tickets: {{ booking.seat_count }}<br>
+                        Price: £{{ booking.total_price }}
+                    </p>
+                    <a href="{% url 'booking_success_event' event_id=booking.event.id %}?from_dashboard=1" class="btn btn-primary mt-2">View</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
     {% else %}
-        <p class="text-center mt-4">You have no bookings yet.</p>
+    <p class="text-muted mb-5">You have no upcoming bookings yet.</p>
     {% endif %}
+
+    <!-- Past Bookings -->
+    <h4 class="mt-5 mb-3">📁 Past Bookings</h4>
+    {% if past_bookings %}
+    <div class="row">
+        {% for booking in past_bookings %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if booking.category == "movie" and booking.movie %}
+                <img src="{{ booking.movie.poster.url }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ booking.movie.title }}</h5>
+                    <p class="card-text">
+                        Showtime: {{ booking.showtime.datetime|date:"D, M j, Y - g:i A" }}<br>
+                        Tickets: {{ booking.seat_count }}<br>
+                        Price: £{{ booking.total_price }}
+                    </p>
+                    {% if booking.status == 'cancelled' %}
+                      <span class="badge bg-danger">Cancelled</span><br>
+                    {% endif %}
+                    <a href="{% url 'booking_success' movie_id=booking.movie.id showtime_id=booking.showtime.id %}?from_dashboard=1" class="btn btn-primary mt-2">View</a>
+                </div>
+                {% elif booking.category == "event" and booking.event %}
+                <img src="{{ booking.event.image.url }}" class="card-img-top" style="height: 250px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ booking.event.title }}</h5>
+                    <p class="card-text">
+                        Date: {{ booking.event.date|date:"D, M j, Y" }}<br>
+                        Tickets: {{ booking.seat_count }}<br>
+                        Price: £{{ booking.total_price }}
+                    </p>
+                    {% if booking.status == 'cancelled' %}
+                      <span class="badge bg-danger">Cancelled</span><br>
+                    {% endif %}
+                    <a href="{% url 'booking_success_event' event_id=booking.event.id %}?from_dashboard=1" class="btn btn-primary mt-2">View</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-muted">You have no past bookings yet.</p>
+    {% endif %}
+
 </div>
 {% endblock %}

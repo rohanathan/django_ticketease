@@ -56,7 +56,10 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    request.session.flush()
+
+    # Clear all messages to prevent them from persisting
+    list(messages.get_messages(request))
+
     return redirect("home")  # Redirect to homepage
 
 
@@ -97,7 +100,7 @@ class CustomPasswordResetView(PasswordResetView):
         if user:
             send_mail(
                 "Reset Your Password - TicketEase",
-                f"Hi {user.username},\n\nClick the link below to reset your password:\nhttp://127.0.0.1:8000/reset/{user.id}/",
+                f"Hi {user.first_name},\n\nClick the link below to reset your password:\nhttp://127.0.0.1:8000/reset/{user.id}/",
                 "noreply@ticketease.com",
                 [email],
                 fail_silently=False,

@@ -223,7 +223,7 @@ Booking Confirmation:
     # Send confirmation email with QR Code attached
     subject = "🎟️ Your TicketEase Booking Confirmation"
     message = f"""
-Hi {request.user.username},
+Hi {request.user.first_name},
 
 Your payment of {total_price} GBP was successful! 🎉
 

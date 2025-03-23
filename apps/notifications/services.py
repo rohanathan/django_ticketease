@@ -13,7 +13,7 @@ def notify_user_registration(user):
     """Sends a welcome email when a user registers."""
     subject = "Welcome to TicketEase! 🎉"
     message = f"""
-    Dear {user.username},
+    Dear {user.first_name},
 
     Welcome to TicketEase! We're excited to have you on board. 🎟️
 
@@ -38,7 +38,7 @@ def notify_user_payment_success(user, transaction_id, amount, currency, payment_
     """Sends a payment success notification to the user and logs any issues."""
     subject = "Payment Confirmation - TicketEase"
     message = f"""
-    Dear {user.username},
+    Dear {user.first_name},
 
     Your payment of {amount} {currency} was successfully processed.
     Transaction ID: {transaction_id}
@@ -57,3 +57,25 @@ def notify_user_payment_success(user, transaction_id, amount, currency, payment_
         logger.info(f"Payment email successfully sent to {recipient_email}")
     except Exception as e:
         logger.error(f"❌ Failed to send payment email: {e}")
+
+
+def notify_user_booking_cancelled(user, booking):
+    subject = "TicketEase Booking Cancelled"
+
+    item = booking.movie.title if booking.category == "movie" else booking.event.title
+    date = booking.showtime.datetime if booking.category == "movie" else booking.event.date
+
+    message = f"""
+    Dear {user.first_name},
+
+    Your booking for '{item}' on {date.strftime('%A, %d %B %Y')} has been successfully cancelled.
+
+    A refund of £{booking.total_price} will be processed within 5–7 business days.
+
+    We're sorry to see you cancel. If you need any assistance, feel free to contact us.
+
+    – TicketEase Team
+    """
+
+    send_notification(user.email, subject, message)
+

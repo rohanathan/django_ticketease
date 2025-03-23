@@ -1,20 +1,58 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container mt-5 text-center">
-    <h2 class="fw-bold">Booking Successful 🎉</h2>
-    <p>Movie: {{ movie.title }}</p>
-    <p>Showtime: {{ showtime.datetime }}</p>
-    <p>Number of Seats: {{ seat_count }}</p>
-    <p>Total Price: {{ total_price }} (GBP)</p>
-    
-    <div>
-        <h4>Your QR Code:</h4>
-        <img src="data:image/png;base64,{{ qr_code_data }}" alt="QR Code">
+<div class="container mt-5">
+  <div class="row align-items-center">
+
+    <!-- Left: Movie Poster -->
+    <div class="col-md-6 mb-4">
+      <img src="{{ movie.poster.url }}" class="img-fluid rounded" style="height: 100%; max-height: 400px; object-fit: cover; width: 100%;" alt="Movie Poster">
     </div>
-    {% if movie and showtime %}
-    <a href="{% url 'booking_success' movie_id=movie.id showtime_id=showtime.id %}" class="btn btn-primary mt-3">
-      View Booking Details
-    </a>
-  {% endif %}
+
+    <!-- Right: Booking Details -->
+    <div class="col-md-6 text-start">
+      {% if not from_dashboard %}
+        <h2 class="fw-bold mb-3">Booking Successful 🎉</h2>
+      {% endif %}
+      <p><strong>Movie:</strong> {{ movie.title }}</p>
+      <p><strong>Showtime:</strong> {{ showtime.datetime }}</p>
+      <p><strong>Seats:</strong> {{ seat_count }}</p>
+      <p><strong>Total Price:</strong> £{{ total_price }}</p>
+
+      <h5 class="mt-4">Your QR Code:</h5>
+      <img src="data:image/png;base64,{{ qr_code_data }}" alt="QR Code" class="img-thumbnail" style="max-width: 200px;">
+
+      {% if from_dashboard and is_upcoming and booking.status == 'confirmed' %}
+      <!-- Cancel Booking Button -->
+      <button class="btn btn-danger mt-4" data-bs-toggle="modal" data-bs-target="#cancelModal{{ booking.id }}">
+        Cancel Booking
+      </button>
+
+      <!-- Modal -->
+      <div class="modal fade" id="cancelModal{{ booking.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ booking.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form method="POST" action="{% url 'cancel_booking' booking.id %}">
+              {% csrf_token %}
+              <div class="modal-header">
+                <h5 class="modal-title" id="cancelModalLabel{{ booking.id }}">Confirm Cancellation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                Are you sure you want to cancel this booking?<br>
+                Refunds will be processed within 5–7 business days.
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep It</button>
+                <button type="submit" class="btn btn-danger">Yes, Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% elif booking.status == 'cancelled' %}
+      <span class="badge bg-danger mt-4">Booking Cancelled</span>
+      {% endif %}
+    </div>
+  </div>
 </div>
 {% endblock %}

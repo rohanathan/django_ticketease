@@ -12,3 +12,9 @@ def home(request):
         'featured_movies': featured_movies,
         'featured_events': featured_events
     })
+
+def contact_us(request):
+    return render(request, "contact_us.html")
+
+def faq(request):
+    return render(request, "faq.html")

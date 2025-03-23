@@ -20,5 +20,15 @@ class Booking(models.Model):
     category = models.CharField(max_length=10, choices=CATEGORY_CHOICES, default="movie")
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+
+    STATUS_CHOICES = [
+    ('confirmed', 'Confirmed'),
+    ('cancelled', 'Cancelled'),
+    ]
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='confirmed')
+
+
     def __str__(self):
         return f"Booking by {self.user.username} on {self.created_at}"

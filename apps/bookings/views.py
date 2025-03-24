@@ -3,7 +3,7 @@ import io
 import base64
 from django.shortcuts import render,get_object_or_404, redirect
 from django.http import HttpResponse
-from apps.movies.models import Movie, Showtime, Seat
+from apps.movies.models import Movie, Showtime
 from apps.events.models import Event                
 from django.db.models import Sum, Q
 from .models import Booking
@@ -13,27 +13,6 @@ from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from apps.notifications.services import notify_user_booking_cancelled
-
-
-def confirm_booking(request, movie_id, showtime_id):
-    """ Show booking summary based on the number of seats selected. """
-    movie = get_object_or_404(Movie, id=movie_id)
-    showtime = get_object_or_404(Showtime, id=showtime_id)
-
-    # Get seat count from URL parameters
-    seat_count = int(request.GET.get("seats", 1))
-
-    # Assume fixed pricing per seat (Modify if needed)
-    price_per_seat = 200  # Example price (₹200 per seat)
-    total_price = seat_count * price_per_seat
-
-    return render(request, "bookings/confirm_booking.html", {
-        "movie": movie,
-        "showtime": showtime,
-        "seat_count": seat_count,
-        "total_price": total_price
-
-    })
 
 
 

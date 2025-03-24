@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import confirm_booking, booking_success, booking_success_event,my_bookings, cancel_booking
+from .views import booking_success, booking_success_event,my_bookings, cancel_booking
 
 urlpatterns = [
     path("<int:movie_id>/showtime/<int:showtime_id>/booking-success/", booking_success, name="booking_success"),

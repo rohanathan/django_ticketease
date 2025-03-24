@@ -79,18 +79,3 @@ class Showtime(models.Model):
         screen_number = self.screen.screen_number if self.screen else "TBA"
         datetime_str = self.datetime.strftime('%Y-%m-%d %H:%M') if self.datetime else "TBA"
         return f"{self.movie.title} - {venue_name} (Screen {screen_number}) at {datetime_str}"
-
-class Seat(models.Model):
-    CLASS_CHOICES = [
-        ('Diamond', 'Diamond Class'),
-        ('Gold', 'Gold Class'),
-    ]
-    showtime = models.ForeignKey(Showtime, on_delete=models.CASCADE, related_name='seats')
-    row = models.CharField(max_length=1)  # A, B, C, etc.
-    number = models.IntegerField()  # 1, 2, 3...
-    seat_class = models.CharField(max_length=10, choices=CLASS_CHOICES)
-    price = models.DecimalField(max_digits=6, decimal_places=2)  # Ticket price
-    is_booked = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"{self.row}{self.number} - {self.seat_class} ({self.price})"

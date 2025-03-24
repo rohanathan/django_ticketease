@@ -251,7 +251,7 @@ TicketEase Team
 
     try:
         email.send(fail_silently=False)
-        logger.info(f"✅ Booking confirmation email sent to {request.user.email}!")
+        logger.info(f" Booking confirmation email sent to {request.user.email}!")
     except Exception as e:
         logger.error(f"❌ Error sending email: {e}")
 

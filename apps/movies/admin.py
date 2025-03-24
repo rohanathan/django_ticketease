@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Movie, Venue, Screen, Showtime, Seat
+from .models import Movie, Venue, Screen, Showtime
 
 @admin.register(Movie)
 class MovieAdmin(admin.ModelAdmin):
@@ -22,8 +22,3 @@ class ShowtimeAdmin(admin.ModelAdmin):
     list_display = ('movie', 'screen', 'datetime')
     list_filter = ('movie', 'screen__venue', 'datetime')
 
-@admin.register(Seat)
-class SeatAdmin(admin.ModelAdmin):
-    list_display = ('showtime', 'row', 'number', 'seat_class', 'price', 'is_booked')
-    list_filter = ('showtime', 'seat_class', 'is_booked')
-    search_fields = ('row', 'number')

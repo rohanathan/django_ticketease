@@ -53,14 +53,11 @@ def login_view(request):
 
 
 #Logout View
-
 def logout_view(request):
-    logout(request)
-
-    # Clear all messages to prevent them from persisting
-    list(messages.get_messages(request))
-
-    return redirect("home")  # Redirect to homepage
+    if request.method in ["GET", "POST"]:
+        logout(request)
+        list(messages.get_messages(request))
+    return redirect("home") # Redirect to homepage after logout
 
 
 

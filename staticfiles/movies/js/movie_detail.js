@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     let selectedDate = "";
 
-    // ✅ Handle Date Selection
+    //  Handle Date Selection
     dateButtons.forEach(button => {
         button.addEventListener("click", function () {
             selectedDate = this.getAttribute("data-date");
@@ -14,15 +14,15 @@ document.addEventListener("DOMContentLoaded", function () {
             dateButtons.forEach(btn => btn.classList.remove("btn-primary"));
             this.classList.add("btn-primary");
 
-            // ✅ Store selected date for use in seat selection
+            //  Store selected date for use in seat selection
             localStorage.setItem("selectedDate", selectedDate);
 
-            // ✅ Fetch Showtimes Dynamically
+            //  Fetch Showtimes Dynamically
             fetchShowtimes(selectedDate);
         });
     });
 
-    // ✅ Fetch Showtimes via AJAX
+    //  Fetch Showtimes via AJAX
     function fetchShowtimes(date) {
         fetch(`/movies/api/dynamic-showtimes/?movie_id=${movieId}&date=${date}`)
             .then(response => response.json())
@@ -58,7 +58,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => console.error("Error fetching showtimes:", error));
     }
 
-    // ✅ Auto-load showtimes for today on page load
+    //  Auto-load showtimes for today on page load
     if (dateButtons.length > 0) {
         dateButtons[0].click();
     }

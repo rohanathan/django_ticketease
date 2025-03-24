@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404
 from .models import Movie, Showtime, Venue
 from datetime import datetime
-from datetime import date  # ✅ FIX: Import date
+from datetime import date  #  FIX: Import date
 
 # List all movies
 def movie_list(request):
@@ -12,24 +12,15 @@ def movie_list(request):
 # Movie detail page
 def movie_detail(request, movie_id):
     movie = get_object_or_404(Movie, id=movie_id)
-    venues = Venue.objects.all()  # ✅ Fetch all venues
-    today = date.today()  # ✅ Send today's date for date picker
+    venues = Venue.objects.all()  #  Fetch all venues
+    today = date.today()  #  Send today's date for date picker
 
     return render(request, "movies/movie_detail.html", {
         "movie": movie,
-        "venues": venues,  # ✅ Ensure venues are passed
+        "venues": venues,  #  Ensure venues are passed
         "today": today
     })
 
-#Seat selection
-def select_seats(request, movie_id, showtime_id):
-    movie = get_object_or_404(Movie, id=movie_id)
-    showtime = get_object_or_404(Showtime, id=showtime_id)
-
-    return render(request, "movies/select_seats.html", {
-        "movie": movie,
-        "showtime": showtime
-    })
 
 #Get Seat Availability
 def get_seats(request, movie_id, showtime_id):

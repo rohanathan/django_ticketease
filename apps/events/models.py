@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils.timezone import now  # ✅ Import `now` for DateTime fields
+from django.utils.timezone import now  #  Import `now` for DateTime fields
 class Event(models.Model):
     title = models.CharField(max_length=255, default="Untitled Event")
     date = models.DateField(null=True, blank=True)  # Allows events without a date

@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
-{% block content %}
+{% load static %}
 
+{% block content %}
 <div class="container text-center mt-5">
     <h2>❌ Payment Cancelled</h2>
     <p>Your payment was not completed. Are you sure you want to cancel?</p>
 
     <button class="btn btn-warning" onclick="goBack()">🔙 Back to Checkout</button>
-    <button class="btn btn-danger" onclick="confirmCancel()">✅ Yes, Cancel</button>
+    <button class="btn btn-danger" onclick="confirmCancel()"> Yes, Cancel</button>
 </div>
+{% endblock %}
 
-
+{% block extra_js %}
 <script src="{% static 'js/cancel.js' %}"></script>
-
-
 {% endblock %}

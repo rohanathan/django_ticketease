@@ -8,7 +8,7 @@ class Payment(models.Model):
         ('failed', 'Failed'),
     ]
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Updated reference
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE) 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=10, default="USD")
     transaction_id = models.CharField(max_length=255, unique=True)

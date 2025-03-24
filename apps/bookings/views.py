@@ -17,6 +17,9 @@ from apps.notifications.services import notify_user_booking_cancelled
 
 
 def booking_success(request, movie_id, showtime_id):
+    """
+    Displays the booking success page for a movie with QR code and booking details.
+    """
     movie = get_object_or_404(Movie, id=movie_id)
     showtime = get_object_or_404(Showtime, id=showtime_id)
 
@@ -60,6 +63,9 @@ def booking_success(request, movie_id, showtime_id):
 
 
 def booking_success_event(request, event_id):
+    """
+    Displays the booking success page for an event with QR code and booking details.
+    """
     event = get_object_or_404(Event, id=event_id)
 
     booking = Booking.objects.filter(user=request.user, event=event).order_by("-created_at").first()

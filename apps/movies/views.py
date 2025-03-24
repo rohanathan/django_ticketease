@@ -6,11 +6,13 @@ from datetime import date  #  FIX: Import date
 
 # List all movies
 def movie_list(request):
+    """Render a list of all movies."""
     movies = Movie.objects.all()
     return render(request, 'movies/movie_list.html', {'movies': movies})
 
 # Movie detail page
 def movie_detail(request, movie_id):
+    """Display detailed information for a specific movie, including venue and today's date."""
     movie = get_object_or_404(Movie, id=movie_id)
     venues = Venue.objects.all()  #  Fetch all venues
     today = date.today()  #  Send today's date for date picker
@@ -24,6 +26,7 @@ def movie_detail(request, movie_id):
 
 #Get Seat Availability
 def get_seats(request, movie_id, showtime_id):
+    """Return seat availability for a given movie and showtime as JSON."""
     showtime = get_object_or_404(Showtime, id=showtime_id)
     seats = Seat.objects.filter(showtime=showtime).order_by('row', 'number')
 
@@ -70,6 +73,7 @@ def get_showtimes(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 def book_tickets(request, movie_id, showtime_id):
+    """Render the ticket booking page for a specific movie and showtime."""
     movie = get_object_or_404(Movie, id=movie_id)
     showtime = get_object_or_404(Showtime, id=showtime_id)
     

@@ -25,7 +25,7 @@
       </button>
       
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
           <li class="nav-item">
             <a class="nav-link" href="{% url 'movie_list' %}">Movies</a>
           </li>
@@ -40,13 +40,14 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarProfile" role="button" data-bs-toggle="dropdown">
               {% if user.profile_picture %}
-              <img src="{{ user.profile_picture.url }}" class="rounded-circle" style="width: 40px; height: 40px;">
+              <img src="{{ user.profile_picture.url }}" class="rounded-circle align-middle" style="width: 40px; height: 40px;">
               {% else %}
-              <img src="/media/profile_pics/default.png" class="rounded-circle" style="width: 40px; height: 40px;">
+              <img src="/media/profile_pics/default.png" class="rounded-circle align-middle" style="width: 40px; height: 40px;">
               {% endif %}
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="{% url 'dashboard' %}">Dashboard</a></li>
+              <li><a class="dropdown-item" href="{% url 'my_bookings' %}">My Bookings</a></li>
               <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
                 <button type="submit" class="dropdown-item">Logout</button>

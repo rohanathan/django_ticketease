@@ -165,3 +165,31 @@ body.dark-mode .modal-content {
     background-color: #007bff !important;  /* Bootstrap Primary Blue */
 }
 
+/* Footer styling for dark mode */
+body.dark-mode footer {
+    background-color: #1e1e1e; /* dark background */
+    color: #ccc;               /* lighter text */
+}
+
+body.dark-mode footer a {
+    color: #59a6ff;           /* lighter link color */
+}
+
+body.dark-mode footer a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+body.dark-mode .card-title {
+    color: white !important;
+  }
+  
+/* Light Mode (default) */
+.movie-title {
+    color: #212529; /* Bootstrap's default dark color */
+  }
+  
+  /* Dark Mode Support */
+  body.dark-mode .movie-title {
+    color: white !important;
+  }
+  

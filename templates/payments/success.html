@@ -15,18 +15,10 @@
 </div>
 
 <script>
-    // Redirect after 5 seconds
-    let timeLeft = 5;
-    const redirectUrl = "{% url 'booking_success' movie_id=movie_id showtime_id=showtime_id %}";
-    const countdownElement = document.getElementById("countdown");
-    
-    const timer = setInterval(() => {
-        timeLeft--;
-        countdownElement.textContent = timeLeft;
-        if (timeLeft <= 0) {
-            clearInterval(timer);
-            window.location.href = redirectUrl;
-        }
-    }, 1000);
-</script>
+    {% if movie_id and showtime_id %}
+      window.redirectUrl = "{% url 'booking_success' movie_id=movie_id showtime_id=showtime_id %}";
+      window.enableSuccessRedirect = true;
+    {% endif %}
+  </script>
+  <script src="{% static 'js/success.js' %}"></script>
 {% endblock %}

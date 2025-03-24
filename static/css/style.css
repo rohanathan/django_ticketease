@@ -160,5 +160,8 @@ body.dark-mode .modal-content {
     filter: invert(1);
   }
   
-
+/* Override Bootswatch Litera navbar background */
+.navbar.bg-dark {
+    background-color: #007bff !important;  /* Bootstrap Primary Blue */
+}
 

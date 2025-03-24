@@ -9,14 +9,8 @@
     <button class="btn btn-danger" onclick="confirmCancel()">✅ Yes, Cancel</button>
 </div>
 
-<script>
-    function goBack() {
-        history.back();  // Goes back to previous page (payment checkout)
-    }
 
-    function confirmCancel() {
-        window.location.href = "/";  // Redirect to home or another page
-    }
-</script>
+<script src="{% static 'js/cancel.js' %}"></script>
+
 
 {% endblock %}
